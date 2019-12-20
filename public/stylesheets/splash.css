@@ -43,27 +43,28 @@ main {
 }
 
 #play > div {
-  position: absolute;
-
   background-color: #e74c3c;
 
   color: #ecf0f1; 
   font-size: 2em;
   padding: 1em;
-
   border-radius: 5px;
   cursor: pointer;
 
   transform: translateY(0);
   box-shadow: 0 .25em #c0392b;
-
-
   transition: all .1s;
 }
 
 #play > div:hover {
   transform: translateY(.1em);
   box-shadow: 0 .15em #c0392b;
+}
+
+#play > div:active {
+  background-color: #c0392b;
+  transform: translateY(.25em);
+  box-shadow: 0 0 #c0392b;
 }
 
 
