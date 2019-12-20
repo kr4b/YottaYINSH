@@ -31,7 +31,6 @@ main {
 }
 
 #title > h1 {
-  font-family: Arial, Helvetica, sans-serif;
   font-size: 5em;
 
   margin: 0;
@@ -43,28 +42,28 @@ main {
 }
 
 #play > div {
-  background-color: #e74c3c;
+  background-color: var(--play-button-color);
 
-  color: #ecf0f1; 
+  color: var(--text-color-light); 
   font-size: 2em;
   padding: 1em;
   border-radius: 5px;
   cursor: pointer;
 
   transform: translateY(0);
-  box-shadow: 0 .25em #c0392b;
+  box-shadow: 0 .25em var(--play-button-shadow);
   transition: all .1s;
 }
 
 #play > div:hover {
   transform: translateY(.1em);
-  box-shadow: 0 .15em #c0392b;
+  box-shadow: 0 .15em var(--play-button-shadow);
 }
 
 #play > div:active {
-  background-color: #c0392b;
+  background-color: var(--play-button-shadow);
   transform: translateY(.25em);
-  box-shadow: 0 0 #c0392b;
+  box-shadow: 0 0 var(--play-button-shadow);
 }
 
 

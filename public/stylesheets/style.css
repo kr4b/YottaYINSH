@@ -1,3 +1,11 @@
+:root {
+  --play-button-color:  #1abc9c;
+  --play-button-shadow: #16a085;
+
+  --text-color-light:   #ecf0f1;
+  --text-color-dark:    #2c3e50;
+}
+
 html, body {
   margin: 0;
   height: 100%;
@@ -6,9 +14,18 @@ html, body {
 body {
   box-sizing: border-box;
   padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  /* font: 14px "Lucida Grande", Helvetica, Arial, sans-serif; */
+  font: 14px "Comic Sans MS", "Comic Sans", cursive;
+  color: var(--text-color-dark);
 }
 
 a {
   color: #00B7FF;
+}
+
+.unselectable {
+  user-select: none;
+  -ms-user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
 }
