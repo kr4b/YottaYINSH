@@ -4,6 +4,10 @@
 
   --text-color-light:   #ecf0f1;
   --text-color-dark:    #2c3e50;
+
+  --background-color1:  #bdc3c7;
+  --background-color2:  #95a5a6;
+  --background-color3:  #ecf0f1;
 }
 
 html, body {
@@ -17,6 +21,13 @@ body {
   /* font: 14px "Lucida Grande", Helvetica, Arial, sans-serif; */
   font: 14px "Comic Sans MS", "Comic Sans", cursive;
   color: var(--text-color-dark);
+  background:
+    radial-gradient(var(--background-color2) 15%, transparent 16%) 0 0,
+    radial-gradient(var(--background-color2) 15%, transparent 16%) 8px 8px,
+    radial-gradient(var(--background-color3) 15%, transparent 20%) 0 1px,
+    radial-gradient(var(--background-color3) 15%, transparent 20%) 8px 9px;
+  background-color: var(--background-color1);
+  background-size:16px 16px;
 }
 
 a {
