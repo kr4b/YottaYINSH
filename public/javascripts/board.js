@@ -11,7 +11,7 @@ export default
       this.ctx = canvas.getContext('2d');
 
       this.boardSpace = new Uint8Array(121);
-      this.verticalSpacing = this.ctx.canvas.height / 15;
+      this.verticalSpacing = this.ctx.canvas.height * 0.095;
       this.horizontalSpacing = this.verticalSpacing / 2 * Math.sqrt(3);
 
     } else {
@@ -20,14 +20,14 @@ export default
   }
 
   nearestYinshCoordinate(x, y) {
-    const centerX   = (this.ctx.canvas.width - this.horizontalSpacing * intersections.length) / 2;
-    const vertical  = Math.min(Math.round(Math.max(x - centerX, 0) / this.horizontalSpacing), intersections.length - 1);
+    const centerX = (this.ctx.canvas.width - this.horizontalSpacing * intersections.length) / 2;
+    const vertical = Math.min(Math.round(Math.max(x - centerX, 0) / this.horizontalSpacing), intersections.length - 1);
 
-    const centerY   = (this.ctx.canvas.height - this.verticalSpacing * intersections[vertical]) / 2;
-    const point     = Math.min(Math.round(Math.max(y - centerY, 0) / this.verticalSpacing), intersections[vertical]);
-  
+    const centerY = (this.ctx.canvas.height - this.verticalSpacing * intersections[vertical]) / 2;
+    const point = Math.min(Math.round(Math.max(y - centerY, 0) / this.verticalSpacing), intersections[vertical]);
+
     const { x: canvasX, y: canvasY } = this.getCanvasCoordinate(vertical, point);
-    const distance = Math.sqrt((canvasX - x)**2 + (canvasY - y)**2);
+    const distance = Math.sqrt((canvasX - x) ** 2 + (canvasY - y) ** 2);
 
     return { vertical, point, distance };
   }
@@ -35,8 +35,8 @@ export default
   getCanvasCoordinate(vertical, point) {
     if (point < 0 || point >= intersections[vertical]) return null;
 
-    const centerX = (this.ctx.canvas.width - this.horizontalSpacing * intersections.length) / 2;
-    const centerY = (this.ctx.canvas.height - this.verticalSpacing * intersections[vertical]) / 2;
+    const centerX = (this.ctx.canvas.width - this.horizontalSpacing * (intersections.length - 1)) / 2;
+    const centerY = (this.ctx.canvas.height - this.verticalSpacing * (intersections[vertical] + 1)) / 2;
 
     const x = centerX + vertical * this.horizontalSpacing;
     const y = centerY + point * this.verticalSpacing;
@@ -47,13 +47,41 @@ export default
   render() {
     this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
-    for (let i = 0; i < 121; i++) {
-      const coords = this.getCanvasCoordinate(i % 11, (i / 11) | 0);
-      if (coords == null) continue;
-
+    const drawTriangle = (point, dirx, diry) => {
       this.ctx.beginPath();
-      this.ctx.arc(coords.x, coords.y, 2, 0, Math.PI * 2);
+      this.ctx.moveTo(point.x, point.y);
+
+      this.ctx.lineTo(point.x + this.horizontalSpacing * dirx, point.y - this.verticalSpacing / 2);
+      this.ctx.lineTo(point.x + this.horizontalSpacing * dirx * 2, point.y);
+      this.ctx.lineTo(point.x + this.horizontalSpacing * dirx, point.y + this.verticalSpacing / 2);
+      this.ctx.lineTo(point.x, point.y);
+      this.ctx.lineTo(point.x, point.y + this.verticalSpacing * diry);
+      this.ctx.moveTo(point.x + this.horizontalSpacing * 2 * dirx, point.y);
+      this.ctx.lineTo(point.x + this.horizontalSpacing * 2 * dirx, point.y + this.verticalSpacing * diry);
+      this.ctx.moveTo(point.x + this.horizontalSpacing * dirx, point.y - this.verticalSpacing / 2);
+      this.ctx.lineTo(point.x + this.horizontalSpacing * dirx, point.y + this.verticalSpacing / 2);
+
       this.ctx.stroke();
+    }
+    
+    const center = { x: this.ctx.canvas.width / 2, y: this.ctx.canvas.height / 2 };
+    const half_i = (intersections.length / 2) | 0;
+    for (let i = 2; i < half_i + 1; i++) {
+
+      const half_j = Math.round(intersections[half_i - i] / 2);
+
+      for (let j = 0; j < half_j; j++) {
+        const a = this.getCanvasCoordinate(half_i - i, half_j - j);
+        if (a == null) continue;
+
+        a.x = a.x - center.x;
+        a.y = a.y - center.y;
+
+        drawTriangle({ x: center.x + a.x, y: center.y + a.y },  1,  1);
+        drawTriangle({ x: center.x - a.x, y: center.y + a.y }, -1,  1);
+        drawTriangle({ x: center.x + a.x, y: center.y - a.y },  1, -1);
+        drawTriangle({ x: center.x - a.x, y: center.y - a.y }, -1, -1);
+      }
     }
   }
 }
