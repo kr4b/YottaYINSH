@@ -6,25 +6,34 @@ export default
   constructor(canvas) {
     if (canvas instanceof HTMLCanvasElement) {
 
-      canvas.width = canvas.clientWidth;
-      canvas.height = canvas.clientHeight;
       this.ctx = canvas.getContext('2d');
-
       this.boardSpace = new Uint8Array(121);
-      this.verticalSpacing = this.ctx.canvas.height * 0.095;
-      this.horizontalSpacing = this.verticalSpacing / 2 * Math.sqrt(3);
+      
+      this.resize();
 
     } else {
       throw "Invalid argument";
     }
   }
 
-  nearestYinshCoordinate(x, y) {
-    const centerX = (this.ctx.canvas.width - this.horizontalSpacing * intersections.length) / 2;
-    const vertical = Math.min(Math.floor(Math.max(x - centerX, 0) / this.horizontalSpacing), intersections.length - 1);
+  resize() {
+    this.ctx.canvas.width = this.ctx.canvas.clientWidth;
+    this.ctx.canvas.height = this.ctx.canvas.clientHeight;
 
-    const centerY = (this.ctx.canvas.height - this.verticalSpacing * intersections[vertical]) / 2;
-    const point = Math.min(Math.ceil(Math.max(y - centerY, 0) / this.verticalSpacing), intersections[vertical]);
+    this.verticalSpacing = this.ctx.canvas.height * 0.095;
+    this.horizontalSpacing = this.verticalSpacing / 2 * Math.sqrt(3);
+
+    this.render();
+  }
+
+  nearestYinshCoordinate(x, y) {
+    const left = (this.ctx.canvas.width - this.horizontalSpacing * (intersections.length - 1)) / 2;
+    const right = (this.ctx.canvas.width + this.horizontalSpacing * (intersections.length - 1)) / 2;
+    const vertical = Math.round(Math.min(Math.max(x - left, 0), right - left) / this.horizontalSpacing);
+
+    const top = (this.ctx.canvas.height - this.verticalSpacing * (intersections[vertical] - 1)) / 2;
+    const bottom = (this.ctx.canvas.height + this.verticalSpacing * (intersections[vertical] - 1)) / 2;
+    const point = Math.round(Math.min(Math.max(y - top, 0), bottom - top) / this.verticalSpacing);
 
     const { x: canvasX, y: canvasY } = this.getCanvasCoordinate(vertical, point);
     const distance = Math.sqrt((canvasX - x) ** 2 + (canvasY - y) ** 2);
@@ -35,13 +44,13 @@ export default
   getCanvasCoordinate(vertical, point) {
     if (point < 0 || point >= intersections[vertical]) return null;
 
-    const centerX = (this.ctx.canvas.width - this.horizontalSpacing * (intersections.length - 1)) / 2;
-    const centerY = (this.ctx.canvas.height - this.verticalSpacing * (intersections[vertical] + 1)) / 2;
+    const left = (this.ctx.canvas.width - this.horizontalSpacing * (intersections.length - 1)) / 2;
+    const top = (this.ctx.canvas.height - this.verticalSpacing * (intersections[vertical] - 1)) / 2;
 
-    const x = centerX + vertical * this.horizontalSpacing;
-    const y = centerY + point * this.verticalSpacing;
+    const x = left + vertical * this.horizontalSpacing;
+    const y = top + point * this.verticalSpacing;
 
-    return { x, y };
+      return { x, y };
   }
 
   render() {
@@ -68,9 +77,9 @@ export default
     const half_i = (intersections.length / 2) | 0;
     for (let i = 2; i < half_i + 1; i++) {
 
-      const half_j = Math.round(intersections[half_i - i] / 2);
+      const half_j = Math.floor(intersections[half_i - i] / 2);
 
-      for (let j = 0; j < half_j; j++) {
+      for (let j = 0; j < half_j + 1; j++) {
         const a = this.getCanvasCoordinate(half_i - i, half_j - j);
         if (a == null) continue;
 

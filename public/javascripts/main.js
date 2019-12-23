@@ -3,7 +3,7 @@ import Board from "./board.js"
 let mx = 0, my = 0;
 
 onload = () => {
-  const b = new Board(document.getElementById("yinsh-board"));  
+  const b = new Board(document.getElementById("yinsh-board"));
   b.render();
 
   update();
@@ -17,6 +17,10 @@ onload = () => {
     b.ctx.strokeRect(mx - 3 - b.ctx.canvas.offsetLeft, my - 3 - b.ctx.canvas.offsetTop, 6, 6);
 
     requestAnimationFrame(update);
+  }
+
+  onresize = () => {
+    b.resize();
   }
 }
 
