@@ -21,10 +21,10 @@ export default
 
   nearestYinshCoordinate(x, y) {
     const centerX = (this.ctx.canvas.width - this.horizontalSpacing * intersections.length) / 2;
-    const vertical = Math.min(Math.round(Math.max(x - centerX, 0) / this.horizontalSpacing), intersections.length - 1);
+    const vertical = Math.min(Math.floor(Math.max(x - centerX, 0) / this.horizontalSpacing), intersections.length - 1);
 
     const centerY = (this.ctx.canvas.height - this.verticalSpacing * intersections[vertical]) / 2;
-    const point = Math.min(Math.round(Math.max(y - centerY, 0) / this.verticalSpacing), intersections[vertical]);
+    const point = Math.min(Math.ceil(Math.max(y - centerY, 0) / this.verticalSpacing), intersections[vertical]);
 
     const { x: canvasX, y: canvasY } = this.getCanvasCoordinate(vertical, point);
     const distance = Math.sqrt((canvasX - x) ** 2 + (canvasY - y) ** 2);
