@@ -31,9 +31,29 @@ main {
 }
 
 #title > h1 {
-  font-size: 5em;
+  --height: 6em;
+  --font-size: 5em;
 
+  height: var(--height);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  font-size: 1em;
   margin: 0;
+}
+
+#title > h1 > div {
+  background-image: url('../images/logo.png');
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  width: var(--font-size);
+  height: var(--font-size);
+}
+
+#title > h1 > span {
+  font-size: var(--font-size);
 }
 
 /* play */
@@ -41,7 +61,8 @@ main {
   grid-area: "play";
 }
 
-#play > div {
+#play > a {
+  display: block;
   background-color: var(--play-button-color);
 
   color: var(--text-color-light); 
@@ -55,12 +76,12 @@ main {
   transition: all .1s;
 }
 
-#play > div:hover {
+#play > a:hover {
   transform: translateY(.1em);
   box-shadow: 0 .15em var(--play-button-shadow);
 }
 
-#play > div:active {
+#play > a:active {
   background-color: var(--play-button-shadow);
   transform: translateY(.25em);
   box-shadow: 0 0 var(--play-button-shadow);

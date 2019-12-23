@@ -18,8 +18,7 @@ html, body {
 body {
   box-sizing: border-box;
   padding: 50px;
-  /* font: 14px "Lucida Grande", Helvetica, Arial, sans-serif; */
-  font: 14px "Comic Sans MS", "Comic Sans", cursive;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
   color: var(--text-color-dark);
   background:
     radial-gradient(var(--background-color2) 15%, transparent 16%) 0 0,
