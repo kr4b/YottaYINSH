@@ -10,8 +10,10 @@ const usersRouter = require('./routes/users');
 const http = require('http');
 const websocket = require('ws');
 
+const Game = require('./game');
+
 const app = express();
-const PORT = process.argv[2];
+const PORT = process.argv[2] || 3000;
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -57,7 +59,6 @@ function generateId() {
 }
 
 const games = [];
-let id = "0".repeat(ID_LEN);
 
 setInterval(() => {
   wss.clients.forEach(ws => {
@@ -72,9 +73,9 @@ wss.on("connection", ws => {
   ws.alive = true;
 
   ws.on("message", data => {
-    const message = data.parse(json);
+    const message = JSON.parse(data);
     if (message.type == "create") {
-      const game = new Game(generateId());
+      const game = new Game(generateId(), message.game);
       const response = JSON.stringify({ id: game.id });
       ws.send(response);
     }

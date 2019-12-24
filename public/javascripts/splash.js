@@ -13,7 +13,7 @@ onload = () => {
     };
 
     socket.onmessage = message => {
-      const response = JSON.parse(message);
+      const response = JSON.parse(message.data);
       window.location.assign(`game.html?id=${response.id}`);
     }
   }

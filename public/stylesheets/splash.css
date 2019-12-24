@@ -107,7 +107,7 @@ main {
   align-items: center;
 }
 
-#create > #public, #create > #private {
+#create > * {
   width: 25%;
   height: 70%;
 
@@ -126,12 +126,12 @@ main {
   border-radius: 5px;
 }
 
-#create > #public:hover, #create > #private:hover {
+#create > *:hover {
   transform: translateY(.2em);
   box-shadow: 0 .3em var(--play-button-shadow);
 }
 
-#create > #public:active, #create > #private:active {
+#create > *:active {
   transform: translateY(.45em);
   box-shadow: 0 0em var(--play-button-color);
   background-color: var(--play-button-shadow);
