@@ -1,0 +1,26 @@
+<canvas id="canvas"></canvas>
+
+<script>
+  let canvas = document.querySelector("#canvas");
+  canvas.width = 256;
+  canvas.height = 256;
+  let ctx = canvas.getContext("2d");
+
+  ctx.fillStyle = "#2c3e50";
+  ctx.beginPath();
+  ctx.arc(128, 128, 128, 0, 2 * Math.PI);
+  ctx.fill();
+
+  ctx.lineWidth = 5;
+  ctx.strokeStyle = "#ecf0f1";
+  ctx.beginPath();
+  ctx.arc(128, 128, 115, 0, 2 * Math.PI);
+  ctx.stroke();
+
+  ctx.fillStyle = "#ecf0f1";
+  ctx.font = "210px Comic Sans";
+
+  let size = ctx.measureText("Y");
+  ctx.fillText("Y", 128 - size.width / 2, 128 + 70);
+
+</script>
