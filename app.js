@@ -51,8 +51,8 @@ const wss = new websocket.Server({ server });
 const a = 25214903917;
 const c = 11;
 const m = Math.pow(2, 48);
-let seed_game = Date.now();
-let seed_session = Date.now() + 28411;
+let seedGame = Date.now();
+let seedSession = Date.now() + 28411;
 
 function generateId(seed) {
   seed = (a * seed + c) % m;
@@ -81,7 +81,7 @@ setInterval(() => {
 }, 10000);
 
 // Gets a game by game id (id in URL)
-function get_game(id) {
+function getGame(id) {
   for (let game of games) {
     if (game.id == id) {
       return game;
@@ -92,42 +92,42 @@ function get_game(id) {
 }
 
 // Create a new game for the given client
-function create_game(ws, message) {
-  seed_game = generateId(seed_game);
-  const game = new Game(seed_game.toString(36), message.game);
+function createGame(ws, message) {
+  seedGame = generateId(seedGame);
+  const game = new Game(seedGame.toString(36), message.game);
   const response = JSON.stringify({ id: game.id });
   ws.send(response);
   games.push(game);
 }
 
 // Create a new session identifier for the given client
-function create_session(ws) {
-  seed_session = generateId(seed_session);
-  const response = JSON.stringify({ type: "session", id: seed_session.toString(36) });
+function createSession(ws) {
+  seedSession = generateId(seedSession);
+  const response = JSON.stringify({ type: "session", id: seedSession.toString(36) });
   ws.send(response);
 }
 
 // Sends all games with required data to the given client
 // availability, player1, player2, elapsedTime
-function send_games(ws) {
-  const games_list = [];
+function sendGames(ws) {
+  const gamesList = [];
   for (let game of games) {
-    const game_data = {
-      availability: game.is_full() ? "full" : game.type == "private" ? "private" : "open",
+    const gameData = {
+      availability: game.isFull() ? "full" : game.type == "private" ? "private" : "open",
       player1: game.player1 ? game.player1.id : null,
       player2: game.player2 ? game.player2.id : null,
       elapsedTime: game.startTime ? Math.floor((Date.now() - game.startTime) / 1000) : 0,
     };
-    games_list.push(game_data);
+    gamesList.push(gameData);
   }
 
-  ws.send(JSON.stringify({ type: "games", games: games_list }));
+  ws.send(JSON.stringify({ type: "games", games: gamesList }));
 }
 
 // Let the given client join the game
 // If the game is full, the client becomes a spectator
-function join_game(ws, message) {
-  const game = get_game(message.game);
+function joinGame(ws, message) {
+  const game = getGame(message.game);
 
   const player = {
     ws,
@@ -135,26 +135,26 @@ function join_game(ws, message) {
     connected: true
   };
   players.push(player);
-  game.add_player(player);
+  game.addPlayer(player);
 }
 
 // Handle request from a client
-function handle_request(ws, message) {
+function handleRequest(ws, message) {
   switch (message.type) {
     case "games":
-      send_games(ws);
+      sendGames(ws);
       break;
 
     case "create":
-      create_game(ws, message);
+      createGame(ws, message);
       break;
 
     case "join":
-      join_game(ws, message);
+      joinGame(ws, message);
       break;
 
     case "session":
-      create_session(ws);
+      createSession(ws);
       break;
 
     default:
@@ -169,7 +169,7 @@ wss.on("connection", ws => {
 
   ws.on("message", data => {
     const message = JSON.parse(data);
-    handle_request(ws, message);
+    handleRequest(ws, message);
   });
 
   ws.on("pong", () => ws.alive = true);

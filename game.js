@@ -9,12 +9,12 @@ class Game {
     this.spectators = [];
   }
 
-  is_full() {
+  isFull() {
     return this.player1 != null && this.player2 != null;
   }
 
-  add_player(player) {
-    if (this.is_full()) {
+  addPlayer(player) {
+    if (this.isFull()) {
       this.spectators.push(player);
     } else if (this.player1 == null) {
       this.player1 = player;
