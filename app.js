@@ -101,10 +101,27 @@ function create_game(ws, message) {
 }
 
 // Create a new session identifier for the given client
-function create_session(ws, message) {
+function create_session(ws) {
   seed_session = generateId(seed_session);
-  const response = JSON.stringify({ id: seed_session.toString(36) });
+  const response = JSON.stringify({ type: "session", id: seed_session.toString(36) });
   ws.send(response);
+}
+
+// Sends all games with required data to the given client
+// availability, player1, player2, elapsedTime
+function send_games(ws) {
+  const games_list = [];
+  for (let game of games) {
+    const game_data = {
+      availability: game.is_full() ? "full" : game.type == "private" ? "private" : "open",
+      player1: game.player1 ? game.player1.id : null,
+      player2: game.player2 ? game.player2.id : null,
+      elapsedTime: game.startTime ? Math.floor((Date.now() - game.startTime) / 1000) : 0,
+    };
+    games_list.push(game_data);
+  }
+
+  ws.send(JSON.stringify({ type: "games", games: games_list }));
 }
 
 // Let the given client join the game
@@ -124,6 +141,10 @@ function join_game(ws, message) {
 // Handle request from a client
 function handle_request(ws, message) {
   switch (message.type) {
+    case "games":
+      send_games(ws);
+      break;
+
     case "create":
       create_game(ws, message);
       break;
@@ -133,7 +154,7 @@ function handle_request(ws, message) {
       break;
 
     case "session":
-      create_session(ws, message);
+      create_session(ws);
       break;
 
     default:

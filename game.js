@@ -20,6 +20,7 @@ class Game {
       this.player1 = player;
     } else {
       this.player2 = player;
+      this.startTime = Date.now();
       this.player1.ws.send(JSON.stringify({ id: this.player2.id }));
       this.player2.ws.send(JSON.stringify({ id: this.player1.id }));
     }
