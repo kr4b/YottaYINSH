@@ -47,38 +47,108 @@ app.use(function (err, req, res, next) {
 const server = http.createServer(app);
 const wss = new websocket.Server({ server });
 
-// LCG id numbers
+// LCG id numbers for semi-random id's
 const a = 25214903917;
 const c = 11;
 const m = Math.pow(2, 48);
-let seed = Date.now();
+let seed_game = Date.now();
+let seed_session = Date.now() + 28411;
 
-function generateId() {
+function generateId(seed) {
   seed = (a * seed + c) % m;
-  return seed.toString(36);
+  return seed;
 }
 
 const games = [];
+const players = [];
 
+// Close clients that don't respond within 10 seconds
 setInterval(() => {
   wss.clients.forEach(ws => {
-    if (ws.alive === false) ws.terminate();
+    if (ws.alive === false) {
+      for (let player of players) {
+        if (ws == player) {
+          player.connected = false;
+          break;
+        }
+      }
+      ws.terminate();
+    }
 
     ws.alive = false;
     ws.ping();
   })
-}, 5000);
+}, 10000);
 
+// Gets a game by game id (id in URL)
+function get_game(id) {
+  for (let game of games) {
+    if (game.id == id) {
+      return game;
+    }
+  }
+
+  return null;
+}
+
+// Create a new game for the given client
+function create_game(ws, message) {
+  seed_game = generateId(seed_game);
+  const game = new Game(seed_game.toString(36), message.game);
+  const response = JSON.stringify({ id: game.id });
+  ws.send(response);
+  games.push(game);
+}
+
+// Create a new session identifier for the given client
+function create_session(ws, message) {
+  seed_session = generateId(seed_session);
+  const response = JSON.stringify({ id: seed_session.toString(36) });
+  ws.send(response);
+}
+
+// Let the given client join the game
+// If the game is full, the client becomes a spectator
+function join_game(ws, message) {
+  const game = get_game(message.game);
+
+  const player = {
+    ws,
+    id: message.id,
+    connected: true
+  };
+  players.push(player);
+  game.add_player(player);
+}
+
+// Handle request from a client
+function handle_request(ws, message) {
+  switch (message.type) {
+    case "create":
+      create_game(ws, message);
+      break;
+
+    case "join":
+      join_game(ws, message);
+      break;
+
+    case "session":
+      create_session(ws, message);
+      break;
+
+    default:
+      console.log(`Unexpected request: ${message}`);
+      break;
+  }
+}
+
+// Handle client connections
 wss.on("connection", ws => {
   ws.alive = true;
 
   ws.on("message", data => {
     const message = JSON.parse(data);
-    if (message.type == "create") {
-      const game = new Game(generateId(), message.game);
-      const response = JSON.stringify({ id: game.id });
-      ws.send(response);
-    }
+    handle_request(ws, message);
   });
 
   ws.on("pong", () => ws.alive = true);

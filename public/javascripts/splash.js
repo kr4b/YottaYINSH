@@ -1,16 +1,24 @@
 const SOCKET_URL = "ws://localhost:3000";
 
 onload = () => {
+  const socket = new WebSocket(SOCKET_URL);
+
+  socket.onopen = e => {
+    socket.send(JSON.stringify({ type: "session" }));
+  };
+
+  socket.onmessage = message => {
+    const response = JSON.parse(message.data);
+    sessionStorage.setItem("id", response.id);
+  }
+
   const createGame = game => {
-    const socket = new WebSocket(SOCKET_URL);
     const properties = {
       type: "create",
       game
     };
 
-    socket.onopen = e => {
-      socket.send(JSON.stringify(properties));
-    };
+    socket.send(JSON.stringify(properties));
 
     socket.onmessage = message => {
       const response = JSON.parse(message.data);
