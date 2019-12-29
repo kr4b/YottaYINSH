@@ -6,26 +6,25 @@ const ICONS = ["&#x1f513;", "&#x1f510;", "&#x1f441"];
 onload = () => {
   const socket = new WebSocket(SOCKET_URL);
 
-  const addGameItem = (availability, player1, player2, elapsedTime) => {
+  const addGameItem = (gameId, availability, player1, player2, elapsedTime) => {
     const time = Math.floor(elapsedTime / 3600 % 60).toString().padStart(2, '0')
       + ":" + Math.floor(elapsedTime / 60 % 60).toString().padStart(2, '0')
       + ":" + (elapsedTime % 60).toString().padStart(2, '0');
 
     const item = document.createElement("div");
+    item.onclick = () => window.location.assign(`game.html?id=${gameId}`);
     item.className = "item";
     item.innerHTML = `
       <div class="visibility" alt="join">${ICONS[AVAILABILITY[availability]]}</div>
-      <div class="player">${player1 || '-'}</div>
-      <div class="player">${player2 || '-'}</div>
+      <div class="player">${clean(player1 || '-')}</div>
+      <div class="player">${clean(player2 || '-')}</div>
       <div class="player-count">${(player1 ? 1 : 0) + (player2 ? 1 : 0)}/2</div>
       <div class="time">${time}</div>
     `;
     document.querySelector("#list").appendChild(item);
   };
 
-  const clean = str => {
-    return str.replace("<", "&lt;").replace(">", "&gt;");
-  };
+  const clean = str => str.replace("<", "&lt;").replace(">", "&gt;");
 
   const refreshGameItems = games => {
     const list = document.querySelector("#list");
@@ -33,7 +32,7 @@ onload = () => {
     list.innerHTML = "";
     list.appendChild(buttons);
     for (let game of games) {
-      addGameItem(game.availability, clean(game.player1), clean(game.player2), game.elapsedTime);
+      addGameItem(game.id, game.availability, game.player1, game.player2, game.elapsedTime);
     }
   };
 

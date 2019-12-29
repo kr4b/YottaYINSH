@@ -113,6 +113,7 @@ function sendGames(ws) {
   const gamesList = [];
   for (let game of games) {
     const gameData = {
+      id: game.id,
       availability: game.isFull() ? "full" : game.type == "private" ? "private" : "open",
       player1: game.player1 ? game.player1.id : null,
       player2: game.player2 ? game.player2.id : null,
