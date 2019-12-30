@@ -5,7 +5,7 @@ const ROLES = { "waiting": 0, "playing": 1, "spectating": 2 };
 let mx = 0, my = 0;
 
 onload = () => {
-  const socket = new WebSocket(SOCKET_URL)
+  const socket = {};//new WebSocket(SOCKET_URL)
   const b = new Board(document.getElementById("yinsh-board"));
   let role = ROLES["waiting"];
   b.render();
@@ -30,6 +30,9 @@ onload = () => {
       console.log(response);
     }
   };
+
+  b.placeRing(0, 0, 1);
+  b.moveRing({ vertical: 0, point: 0 }, { vertical: 5, point: 5 });
 
   update();
   function update() {

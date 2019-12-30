@@ -18,7 +18,7 @@ export default
   }
 
   getIndex(vertical, point) {
-    if (point < 0 || point >= intersections[vertical]) return -1;
+    if (vertical == undefined || point == undefined || point < 0 || point >= intersections[vertical]) return -1;
     return vertical * 11 + point;
   }
 
@@ -28,18 +28,51 @@ export default
     this.rings[index] = side;
     return true;
   }
+  
+  moveRing(from, to) {
+    const from_index = this.getIndex(from.vertical, from.point);
+    const to_index = this.getIndex(to.vertical, to.point);
+    if (from_index < 0 || to_index < 0 || this.rings[from_index] == undefined) return false;
+
+    const paths = this.getPossiblePaths(from.vertical, from.point);
+    if (!paths.includes(to_index)) return false;
+    this.rings[to_index] = this.rings[from_index];
+    delete this.rings[from_index];
+    return true;
+  }
+
+  removeRing(vertical, point) {
+    const index = this.getIndex(vertical, point);
+    if (index < 0 || this.rings[index] == undefined) return false;
+    delete this.rings[index];
+    return true;
+  }
 
   placeMarker(vertical, point, side) {
     const index = this.getIndex(vertical, point);
-    if (index < 0) return false;
+    if (index < 0 || this.markers[index] != undefined) return false; // TODO: add check for ring
     this.markers[index] = side;
+    return true;
+  }
+
+  flipMarker(vertical, point) {
+    const index = this.getIndex(vertical, point);
+    if (index < 0 || this.markers[index] == undefined) return false;
+    this.markers[index] = (this.markers[index + 1] + 1) % 2;
+    return false;
+  }
+
+  removeMarker(vertical, point) {
+    const index = this.getIndex(vertical, point);
+    if (index < 0 || this.markers[index] == undefined) return false;
+    delete this.markers[index];
     return true;
   }
 
   getPossiblePaths(vertical, point, direction = -1, passed_marker = false) {
     const index = this.getIndex(vertical, point);
     if (index < 0 || isNaN(vertical) || isNaN(point)) return [];
-    if (this.direction != -1 && this.rings[index] != undefined) return [];
+    if (direction != -1 && this.rings[index] != undefined) return [];
     if (passed_marker && this.rings[index] == undefined && this.markers[index] == undefined) return [index];
 
     if (this.markers[index] != undefined) passed_marker = true;
