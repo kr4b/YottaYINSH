@@ -7,13 +7,60 @@ export default
     if (canvas instanceof HTMLCanvasElement) {
 
       this.ctx = canvas.getContext('2d');
-      this.boardSpace = new Uint8Array(121);
-      
+      this.rings = {};
+      this.markers = {};
+
       this.resize();
 
     } else {
       throw "Invalid argument";
     }
+  }
+
+  getIndex(vertical, point) {
+    if (point < 0 || point >= intersections[vertical]) return -1;
+    return vertical * 11 + point;
+  }
+
+  placeRing(vertical, point, side) {
+    const index = this.getIndex(vertical, point);
+    if (index < 0 || this.rings[index] != undefined) return false;
+    this.rings[index] = side;
+    return true;
+  }
+
+  placeMarker(vertical, point, side) {
+    const index = this.getIndex(vertical, point);
+    if (index < 0) return false;
+    this.markers[index] = side;
+    return true;
+  }
+
+  getPossiblePaths(vertical, point, direction = -1, passed_marker = false) {
+    const index = this.getIndex(vertical, point);
+    if (index < 0 || isNaN(vertical) || isNaN(point)) return [];
+    if (this.direction != -1 && this.rings[index] != undefined) return [];
+    if (passed_marker && this.rings[index] == undefined && this.markers[index] == undefined) return [index];
+
+    if (this.markers[index] != undefined) passed_marker = true;
+
+    let out = [];
+    if (this.markers[index] == undefined) out.push(index);
+
+    if (direction == -1 || direction == 0)
+      out = out.concat(this.getPossiblePaths(vertical, point - 1, 0, passed_marker));
+    if (direction == -1 || direction == 1)
+      out = out.concat(this.getPossiblePaths(vertical + 1, point + Math.floor((intersections[vertical + 1] - intersections[vertical]) / 2), 1, passed_marker));
+    if (direction == -1 || direction == 2)
+      out = out.concat(this.getPossiblePaths(vertical + 1, point + Math.floor((intersections[vertical + 1] - intersections[vertical]) / 2) + 1, 2, passed_marker));
+    if (direction == -1 || direction == 3)
+      out = out.concat(this.getPossiblePaths(vertical, point + 1, 3, passed_marker));
+    if (direction == -1 || direction == 4)
+      out = out.concat(this.getPossiblePaths(vertical - 1, point + Math.floor((intersections[vertical - 1] - intersections[vertical]) / 2) + 1, 4, passed_marker));
+    if (direction == -1 || direction == 5)
+      out = out.concat(this.getPossiblePaths(vertical - 1, point + Math.floor((intersections[vertical - 1] - intersections[vertical]) / 2), 5, passed_marker));
+
+    return out;
   }
 
   resize() {
@@ -50,7 +97,7 @@ export default
     const x = left + vertical * this.horizontalSpacing;
     const y = top + point * this.verticalSpacing;
 
-      return { x, y };
+    return { x, y };
   }
 
   render() {
@@ -72,7 +119,7 @@ export default
 
       this.ctx.stroke();
     }
-    
+
     const center = { x: this.ctx.canvas.width / 2, y: this.ctx.canvas.height / 2 };
     const half_i = (intersections.length / 2) | 0;
     for (let i = 2; i < half_i + 1; i++) {
@@ -86,11 +133,20 @@ export default
         a.x = a.x - center.x;
         a.y = a.y - center.y;
 
-        drawTriangle({ x: center.x + a.x, y: center.y + a.y },  1,  1);
-        drawTriangle({ x: center.x - a.x, y: center.y + a.y }, -1,  1);
-        drawTriangle({ x: center.x + a.x, y: center.y - a.y },  1, -1);
+        drawTriangle({ x: center.x + a.x, y: center.y + a.y }, 1, 1);
+        drawTriangle({ x: center.x - a.x, y: center.y + a.y }, -1, 1);
+        drawTriangle({ x: center.x + a.x, y: center.y - a.y }, 1, -1);
         drawTriangle({ x: center.x - a.x, y: center.y - a.y }, -1, -1);
       }
+    }
+
+
+    for (let key in this.rings) {
+      const vertical = (key / 11) | 0;
+      const point = key % 11;
+      const coord = this.getCanvasCoordinate(vertical, point);
+
+      this.ctx.fillRect(coord.x - 10, coord.y - 10, 20, 20);
     }
   }
 }
