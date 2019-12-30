@@ -31,8 +31,10 @@ onload = () => {
     }
   };
 
-  b.placeRing(0, 0, 1);
-  b.moveRing({ vertical: 0, point: 0 }, { vertical: 5, point: 5 });
+  b.placeRing(0, 0, 0);
+  b.placeMarker(1, 2, 0);
+  b.placeMarker(2, 3, 1);
+  b.moveRing({ vertical: 0, point: 0 }, { vertical: 3, point: 4 });
 
   update();
   function update() {
@@ -44,7 +46,7 @@ onload = () => {
     b.ctx.strokeRect(canv.x - 3, canv.y - 3, 6, 6);
     b.ctx.strokeRect(mx - 3 - b.ctx.canvas.offsetLeft, my - 3 - b.ctx.canvas.offsetTop, 6, 6);
 
-    const possible = b.getPossiblePaths(yinsh.vertical, yinsh.point);
+    const possible = b.getPossiblePaths(yinsh.vertical, yinsh.point, {});
     for (let index of possible) {
       const vertical = (index / 11) | 0;
       const point = index % 11;
@@ -52,7 +54,7 @@ onload = () => {
       b.ctx.fillRect(coord.x - 6, coord.y - 6, 12, 12);
     }
 
-    requestAnimationFrame(update);
+    //requestAnimationFrame(update);
   }
 
   onresize = () => {

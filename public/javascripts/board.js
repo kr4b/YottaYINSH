@@ -1,4 +1,6 @@
 const intersections = [4, 7, 8, 9, 10, 9, 10, 9, 8, 7, 4];
+const black = 0;
+const white = 1;
 
 export default
   class Board {
@@ -34,8 +36,16 @@ export default
     const to_index = this.getIndex(to.vertical, to.point);
     if (from_index < 0 || to_index < 0 || this.rings[from_index] == undefined) return false;
 
-    const paths = this.getPossiblePaths(from.vertical, from.point);
+    const flipped = {};
+    const paths = this.getPossiblePaths(from.vertical, from.point, flipped);
     if (!paths.includes(to_index)) return false;
+
+    if (flipped[to_index] != undefined) {
+      for (let key of flipped[to_index]) {
+        this.markers[key] = (this.markers[key] + 1) % 2;
+      }
+    }
+
     this.rings[to_index] = this.rings[from_index];
     delete this.rings[from_index];
     return true;
@@ -58,7 +68,7 @@ export default
   flipMarker(vertical, point) {
     const index = this.getIndex(vertical, point);
     if (index < 0 || this.markers[index] == undefined) return false;
-    this.markers[index] = (this.markers[index + 1] + 1) % 2;
+    this.markers[index] = (this.markers[index] + 1) % 2;
     return false;
   }
 
@@ -69,29 +79,42 @@ export default
     return true;
   }
 
-  getPossiblePaths(vertical, point, direction = -1, passed_marker = false) {
+  getPossiblePaths(vertical, point, flipped, direction = -1, passed_marker = false) {
     const index = this.getIndex(vertical, point);
     if (index < 0 || isNaN(vertical) || isNaN(point)) return [];
     if (direction != -1 && this.rings[index] != undefined) return [];
-    if (passed_marker && this.rings[index] == undefined && this.markers[index] == undefined) return [index];
+    if (direction == -1) {
+      flipped[0] = [];
+      flipped[1] = [];
+      flipped[2] = [];
+      flipped[3] = [];
+      flipped[4] = [];
+      flipped[5] = [];
+    }
+    if (passed_marker && this.rings[index] == undefined && this.markers[index] == undefined) {
+      flipped[index] = flipped[direction];
+      delete flipped[direction];
+      return [index];
+    }
 
     if (this.markers[index] != undefined) passed_marker = true;
 
     let out = [];
     if (this.markers[index] == undefined) out.push(index);
+    else flipped[direction].push(index);
 
     if (direction == -1 || direction == 0)
-      out = out.concat(this.getPossiblePaths(vertical, point - 1, 0, passed_marker));
+      out = out.concat(this.getPossiblePaths(vertical, point - 1, flipped, 0, passed_marker));
     if (direction == -1 || direction == 1)
-      out = out.concat(this.getPossiblePaths(vertical + 1, point + Math.floor((intersections[vertical + 1] - intersections[vertical]) / 2), 1, passed_marker));
+      out = out.concat(this.getPossiblePaths(vertical + 1, point + Math.floor((intersections[vertical + 1] - intersections[vertical]) / 2), flipped, 1, passed_marker));
     if (direction == -1 || direction == 2)
-      out = out.concat(this.getPossiblePaths(vertical + 1, point + Math.floor((intersections[vertical + 1] - intersections[vertical]) / 2) + 1, 2, passed_marker));
+      out = out.concat(this.getPossiblePaths(vertical + 1, point + Math.floor((intersections[vertical + 1] - intersections[vertical]) / 2) + 1, flipped, 2, passed_marker));
     if (direction == -1 || direction == 3)
-      out = out.concat(this.getPossiblePaths(vertical, point + 1, 3, passed_marker));
+      out = out.concat(this.getPossiblePaths(vertical, point + 1, flipped, 3, passed_marker));
     if (direction == -1 || direction == 4)
-      out = out.concat(this.getPossiblePaths(vertical - 1, point + Math.floor((intersections[vertical - 1] - intersections[vertical]) / 2) + 1, 4, passed_marker));
+      out = out.concat(this.getPossiblePaths(vertical - 1, point + Math.floor((intersections[vertical - 1] - intersections[vertical]) / 2) + 1, flipped, 4, passed_marker));
     if (direction == -1 || direction == 5)
-      out = out.concat(this.getPossiblePaths(vertical - 1, point + Math.floor((intersections[vertical - 1] - intersections[vertical]) / 2), 5, passed_marker));
+      out = out.concat(this.getPossiblePaths(vertical - 1, point + Math.floor((intersections[vertical - 1] - intersections[vertical]) / 2), flipped, 5, passed_marker));
 
     return out;
   }
@@ -174,12 +197,32 @@ export default
     }
 
 
+    this.ctx.save();
+    this.ctx.lineWidth = 10;
     for (let key in this.rings) {
       const vertical = (key / 11) | 0;
       const point = key % 11;
       const coord = this.getCanvasCoordinate(vertical, point);
 
-      this.ctx.fillRect(coord.x - 10, coord.y - 10, 20, 20);
+      this.ctx.strokeStyle = this.rings[key] == black ? '#111' : '#ddd';
+      this.ctx.beginPath();
+      this.ctx.arc(coord.x, coord.y, this.horizontalSpacing * .35, 0, Math.PI * 2);
+      this.ctx.stroke();
     }
+    this.ctx.restore();
+
+    
+    this.ctx.save();
+    for (let key in this.markers) {
+      const vertical = (key / 11) | 0;
+      const point = key % 11;
+      const coord = this.getCanvasCoordinate(vertical, point);
+
+      this.ctx.fillStyle = this.markers[key] == black ? '#111' : '#ddd';
+      this.ctx.beginPath();
+      this.ctx.arc(coord.x, coord.y, this.horizontalSpacing * .35, 0, Math.PI * 2);
+      this.ctx.fill();
+    }
+    this.ctx.restore();
   }
 }
