@@ -1,10 +1,12 @@
+import Socket from "./socket.js"
+
 const SOCKET_URL = "ws://localhost:3000";
 
 const AVAILABILITY = { "open": 0, "private": 1, "full": 2 };
 const ICONS = ["&#x1f513;", "&#x1f510;", "&#x1f441"];
 
 onload = () => {
-  const socket = new WebSocket(SOCKET_URL);
+  const socket = new Socket(new WebSocket(SOCKET_URL));
 
   const addGameItem = (gameId, availability, player1, player2, elapsedTime) => {
     const time = Math.floor(elapsedTime / 3600 % 60).toString().padStart(2, '0')
@@ -36,35 +38,28 @@ onload = () => {
     }
   };
 
-  socket.onopen = e => {
-    socket.send(JSON.stringify({ type: "session" }));
-    socket.send(JSON.stringify({ type: "games" }));
+  socket.ws.onopen = () => {
+    socket.send("session", {});
+    socket.send("games", {});
     setInterval(() => {
-      socket.send(JSON.stringify({ type: "games" }));
+      socket.send("games", {});
     }, 1000);
   };
 
-  socket.onmessage = message => {
-    const response = JSON.parse(message.data);
-    if (response.type == "games") {
-      refreshGameItems(response.games);
-    } else if (response.type == "session") {
-      sessionStorage.setItem("id", response.id);
-    }
-  }
+  socket.setReceive("games", data => {
+    refreshGameItems(data.games);
+  });
+
+  socket.setReceive("session", data => {
+    sessionStorage.setItem("id", data.id);
+  });
 
   const createGame = game => {
-    const properties = {
-      type: "create",
-      game
-    };
+    socket.send("create", { game });
 
-    socket.send(JSON.stringify(properties));
-
-    socket.onmessage = message => {
-      const response = JSON.parse(message.data);
-      window.location.assign(`game.html?id=${response.id}`);
-    }
+    socket.setReceive("create", data => {
+      window.location.assign(`game.html?id=${data.id}`);
+    });
   }
 
   document.querySelector("#public").onclick = () => createGame("public");

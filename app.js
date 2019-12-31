@@ -95,16 +95,14 @@ function getGame(id) {
 function createGame(ws, message) {
   seedGame = generateId(seedGame);
   const game = new Game(seedGame.toString(36), message.game);
-  const response = JSON.stringify({ id: game.id });
-  ws.send(response);
   games.push(game);
+  return { id: game.id };
 }
 
 // Create a new session identifier for the given client
 function createSession(ws) {
   seedSession = generateId(seedSession);
-  const response = JSON.stringify({ type: "session", id: seedSession.toString(36) });
-  ws.send(response);
+  return { id: seedSession.toString(36) };
 }
 
 // Sends all games with required data to the given client
@@ -122,7 +120,7 @@ function sendGames(ws) {
     gamesList.push(gameData);
   }
 
-  ws.send(JSON.stringify({ type: "games", games: gamesList }));
+  return { games: gamesList };
 }
 
 // Let the given client join the game
@@ -141,26 +139,34 @@ function joinGame(ws, message) {
 
 // Handle request from a client
 function handleRequest(ws, message) {
-  switch (message.type) {
+  let response = null;
+  const key = message.key;
+  const data = message.data;
+
+  switch (key) {
     case "games":
-      sendGames(ws);
+      response = sendGames(ws);
       break;
 
     case "create":
-      createGame(ws, message);
+      response = createGame(ws, data);
       break;
 
     case "join":
-      joinGame(ws, message);
+      joinGame(ws, data);
       break;
 
     case "session":
-      createSession(ws);
+      response = createSession(ws);
       break;
 
     default:
       console.log(`Unexpected request: ${message}`);
       break;
+  }
+
+  if (response != null) {
+    ws.send(JSON.stringify({ key: key, data: response }));
   }
 }
 
