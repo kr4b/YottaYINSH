@@ -46,6 +46,7 @@ export default
       }
     }
 
+    this.markers[from_index] = this.rings[from_index];
     this.rings[to_index] = this.rings[from_index];
     delete this.rings[from_index];
     return true;
@@ -60,7 +61,7 @@ export default
 
   placeMarker(vertical, point, side) {
     const index = this.getIndex(vertical, point);
-    if (index < 0 || this.markers[index] != undefined) return false; // TODO: add check for ring
+    if (index < 0 || this.markers[index] != undefined) return false;
     this.markers[index] = side;
     return true;
   }
@@ -101,7 +102,7 @@ export default
 
     let out = [];
     if (this.markers[index] == undefined) out.push(index);
-    else flipped[direction].push(index);
+    else if (direction != -1 && this.markers[index] != undefined) flipped[direction].push(index);
 
     if (direction == -1 || direction == 0)
       out = out.concat(this.getPossiblePaths(vertical, point - 1, flipped, 0, passed_marker));
@@ -115,6 +116,44 @@ export default
       out = out.concat(this.getPossiblePaths(vertical - 1, point + Math.floor((intersections[vertical - 1] - intersections[vertical]) / 2) + 1, flipped, 4, passed_marker));
     if (direction == -1 || direction == 5)
       out = out.concat(this.getPossiblePaths(vertical - 1, point + Math.floor((intersections[vertical - 1] - intersections[vertical]) / 2), flipped, 5, passed_marker));
+
+    return out;
+  }
+
+  checkFiveInRow() {
+    const recursiveCheck = (index, side, out, counter = 1, prev = []) => {
+      const vertical = (index / 11) | 0;
+      const point = index % 11;
+      const neighbours = [
+        this.getIndex(vertical, point - 1),
+        this.getIndex(vertical + 1, point + Math.floor((intersections[vertical + 1] - intersections[vertical]) / 2)),
+        this.getIndex(vertical + 1, point + Math.floor((intersections[vertical + 1] - intersections[vertical]) / 2) + 1),
+      ];
+
+      prev.push(index);
+
+      if (this.markers[index] != side) return 0;
+      else if (counter > 5) return counter;
+      else out.push(index);
+
+      for (let i in neighbours) {
+        if (neighbours[i] >= 0 && this.markers[neighbours[i]] == side && !prev.includes(neighbours[i])) {
+          counter = recursiveCheck(neighbours[i], side, out, counter + 1, prev);
+        }
+      }
+
+      return counter;
+    }
+
+    const out = {};
+    out[black] = [];
+    out[white] = [];
+
+    for (let index in this.markers) {
+      const tmp = [];
+      recursiveCheck(parseInt(index), 0, tmp);
+      if (tmp.length == 5) out[this.markers[index]].push(tmp);
+    }
 
     return out;
   }

@@ -31,10 +31,13 @@ onload = () => {
     }
   };
 
-  b.placeRing(0, 0, 0);
+  b.placeMarker(0, 0, 0);
   b.placeMarker(1, 2, 0);
-  b.placeMarker(2, 3, 1);
-  b.moveRing({ vertical: 0, point: 0 }, { vertical: 3, point: 4 });
+  b.placeMarker(2, 3, 0);
+  b.placeMarker(3, 4, 0);
+  b.placeMarker(4, 5, 0);
+  b.placeMarker(5, 5, 0);
+  console.log(b.checkFiveInRow());
 
   update();
   function update() {
@@ -54,7 +57,7 @@ onload = () => {
       b.ctx.fillRect(coord.x - 6, coord.y - 6, 12, 12);
     }
 
-    //requestAnimationFrame(update);
+    requestAnimationFrame(update);
   }
 
   onresize = () => {
