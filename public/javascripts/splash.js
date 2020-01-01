@@ -29,7 +29,7 @@ onload = () => {
   };
 
   // Clean player name to prevent HTML injection
-  const clean = str => str.replace("<", "&lt;").replace(">", "&gt;");
+  const clean = str => str.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
   // Refresh the list of game items
   const refreshGameItems = games => {
@@ -43,11 +43,16 @@ onload = () => {
   };
 
   socket.ws.onopen = () => {
-    socket.send("session", {});
+    if (sessionStorage.getItem("id") == null) socket.send("session", {});
+
     socket.send("games", {});
     setInterval(() => {
       socket.send("games", {});
     }, 1000);
+  };
+
+  document.querySelector("#name > input").oninput = e => {
+    socket.send("name", { id: sessionStorage.getItem("id"), name: e.srcElement.value });
   };
 
   socket.setReceive("games", data => {
@@ -68,7 +73,7 @@ onload = () => {
 
   const createGame = game => {
     socket.send("create", { game });
-  }
+  };
 
   document.querySelector("#public").onclick = () => createGame("public");
   document.querySelector("#private").onclick = () => createGame("private");

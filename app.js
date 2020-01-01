@@ -86,6 +86,17 @@ function getGamePrivate(id) {
   return null;
 }
 
+// Gets a player by a session id
+function getPlayer(id) {
+  for (let player of players) {
+    if (player.id == id) {
+      return player;
+    }
+  }
+
+  return null;
+}
+
 // Create a new game for the given client
 function createGame(ws, message) {
   const game = new Game(generateId(), generateId(), message.game);
@@ -106,8 +117,8 @@ function sendGames(ws) {
     const gameData = {
       id: game.publicId,
       availability: game.isFull() ? "full" : game.type == "private" ? "private" : "open",
-      player1: game.player1 ? game.player1.id : null,
-      player2: game.player2 ? game.player2.id : null,
+      player1: game.player1 ? game.player1.name : null,
+      player2: game.player2 ? game.player2.name : null,
       elapsedTime: game.startTime ? Math.floor((Date.now() - game.startTime) / 1000) : 0,
     };
     gamesList.push(gameData);
@@ -128,12 +139,16 @@ function joinGame(ws, message) {
   let role = "waiting";
   if (game.isFull()) role = "spectating";
 
-  const player = {
-    ws,
-    id: message.id,
-    connected: true
-  };
-  players.push(player);
+  let player = getPlayer(message.id);
+  if (player == null) {
+    player = {
+      ws,
+      id: message.id,
+      name: "Guest",
+      connected: true
+    };
+    players.push(player);
+  }
   game.addPlayer(player);
 
   if (game.isFull()) role = "playing";
@@ -150,6 +165,22 @@ function getPrivateId(ws, message) {
   }
 
   return { id: game.privateId };
+}
+
+// Sets the name of the player with the given id
+function setName(ws, data) {
+  const player = getPlayer(data.id);
+  if (player == null) {
+    const player = {
+      ws,
+      id: data.id,
+      name: data.name,
+      connected: true
+    };
+    players.push(player);
+  } else {
+    player.name = data.name
+  }
 }
 
 // Handle request from the given client
@@ -183,8 +214,12 @@ function handleRequest(ws, message) {
       getGamePrivate(data.game).handleMove(data.from, data.to);
       break;
 
+    case "name":
+      setName(ws, data);
+      break;
+
     default:
-      console.log(`Unexpected request: ${message.data}`);
+      console.log(`Unexpected request: '${message.key}'`);
       break;
   }
 
