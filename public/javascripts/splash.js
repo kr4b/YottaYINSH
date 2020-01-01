@@ -9,12 +9,13 @@ onload = () => {
   const socket = new Socket(new WebSocket(SOCKET_URL));
 
   const addGameItem = (gameId, availability, player1, player2, elapsedTime) => {
-    const time = Math.floor(elapsedTime / 3600 % 60).toString().padStart(2, '0')
+    const time = Math.floor(elapsedTime / 3600).toString().padStart(2, '0')
       + ":" + Math.floor(elapsedTime / 60 % 60).toString().padStart(2, '0')
       + ":" + (elapsedTime % 60).toString().padStart(2, '0');
 
     const item = document.createElement("div");
-    item.onclick = () => window.location.assign(`game.html?id=${gameId}`);
+
+    item.onclick = () => socket.send("public", { id: gameId });
     item.className = "item";
     item.innerHTML = `
       <div class="visibility" alt="join">${ICONS[AVAILABILITY[availability]]}</div>
@@ -54,8 +55,12 @@ onload = () => {
     sessionStorage.setItem("id", data.id);
   });
 
-  socket.setReceive("create", data => {
+  socket.setReceive("public", data => {
     window.location.assign(`game.html?id=${data.id}`);
+  });
+
+  socket.setReceive("create", data => {
+    socket.send("public", { id: data.id });
   });
 
   const createGame = game => {

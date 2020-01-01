@@ -11,6 +11,10 @@ onload = () => {
   let role = ROLES["waiting"];
   b.render();
 
+  socket.setReceive("join", data => {
+    role = ROLES[data.role];
+  });
+
   socket.ws.onopen = () => {
     const sessionId = sessionStorage.getItem("id");
     const url = new URL(window.location);
@@ -21,10 +25,6 @@ onload = () => {
     };
     socket.send("join", properties);
   };
-
-  socket.setReceive("join", data => {
-    role = ROLES[data.role];
-  });
 
   update();
   function update() {

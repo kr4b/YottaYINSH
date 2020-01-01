@@ -75,10 +75,21 @@ setInterval(() => {
   })
 }, 10000);
 
-// Gets a game by game id (id in URL)
-function getGame(id) {
+// Gets a game by public game id
+function getGamePublic(id) {
   for (let game of games) {
-    if (game.id == id) {
+    if (game.publicId == id) {
+      return game;
+    }
+  }
+
+  return null;
+}
+
+// Gets a game by private game id (id in URL)
+function getGamePrivate(id) {
+  for (let game of games) {
+    if (game.privateId == id) {
       return game;
     }
   }
@@ -88,9 +99,9 @@ function getGame(id) {
 
 // Create a new game for the given client
 function createGame(ws, message) {
-  const game = new Game(generateId(), message.game);
+  const game = new Game(generateId(), generateId(), message.game);
   games.push(game);
-  return { id: game.id };
+  return { id: game.publicId };
 }
 
 // Create a new session identifier for the given client
@@ -104,7 +115,7 @@ function sendGames(ws) {
   const gamesList = [];
   for (let game of games) {
     const gameData = {
-      id: game.id,
+      id: game.publicId,
       availability: game.isFull() ? "full" : game.type == "private" ? "private" : "open",
       player1: game.player1 ? game.player1.id : null,
       player2: game.player2 ? game.player2.id : null,
@@ -119,10 +130,14 @@ function sendGames(ws) {
 // Let the given client join the game
 // If the game is full, the client becomes a spectator
 function joinGame(ws, message) {
-  const game = getGame(message.game);
+  const game = getGamePrivate(message.game);
+
   if (game == null) {
-    return;
+    return null;
   }
+
+  let role = "waiting";
+  if (game.isFull()) role = "spectating";
 
   const player = {
     ws,
@@ -131,6 +146,21 @@ function joinGame(ws, message) {
   };
   players.push(player);
   game.addPlayer(player);
+
+  if (game.isFull()) role = "playing";
+
+  return { role };
+}
+
+// Attempts to get the private game id if allowed
+function getPrivateId(ws, message) {
+  const game = getGamePublic(message.id);
+
+  if (game == null || (game.type == "private" && !game.isFull() && game.player1 != null)) {
+    return null;
+  }
+
+  return { id: game.privateId };
 }
 
 // Handle request from the given client
@@ -149,15 +179,19 @@ function handleRequest(ws, message) {
       break;
 
     case "join":
-      joinGame(ws, data);
+      response = joinGame(ws, data);
       break;
 
     case "session":
       response = createSession(ws);
       break;
 
+    case "public":
+      response = getPrivateId(ws, data);
+      break;
+
     default:
-      console.log(`Unexpected request: ${message}`);
+      console.log(`Unexpected request: ${message.data}`);
       break;
   }
 

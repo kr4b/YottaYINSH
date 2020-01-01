@@ -1,6 +1,7 @@
 class Game {
-  constructor(id, type) {
-    this.id = id;
+  constructor(publicId, privateId, type) {
+    this.publicId = publicId;
+    this.privateId = privateId;
     this.type = type;
     this.startTime = null;
 
