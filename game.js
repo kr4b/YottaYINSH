@@ -21,7 +21,7 @@ class Game {
       this.player1 = player;
       if (this.type == "ai") {
         this.player2 = {
-          id: "&#x1F4BB; (AI)",
+          name: "&#x1F4BB; (AI)",
         };
       }
     } else {
