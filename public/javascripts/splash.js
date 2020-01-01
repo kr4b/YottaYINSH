@@ -54,12 +54,12 @@ onload = () => {
     sessionStorage.setItem("id", data.id);
   });
 
+  socket.setReceive("create", data => {
+    window.location.assign(`game.html?id=${data.id}`);
+  });
+
   const createGame = game => {
     socket.send("create", { game });
-
-    socket.setReceive("create", data => {
-      window.location.assign(`game.html?id=${data.id}`);
-    });
   }
 
   document.querySelector("#public").onclick = () => createGame("public");

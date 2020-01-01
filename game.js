@@ -18,6 +18,11 @@ class Game {
       this.spectators.push(player);
     } else if (this.player1 == null) {
       this.player1 = player;
+      if (this.type == "ai") {
+        this.player2 = {
+          id: "&#x1F4BB; (AI)",
+        };
+      }
     } else {
       this.player2 = player;
       this.startTime = Date.now();

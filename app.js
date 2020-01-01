@@ -1,32 +1,34 @@
-const createError = require('http-errors');
-const express = require('express');
-const path = require('path');
-const cookieParser = require('cookie-parser');
-const logger = require('morgan');
+const createError = require("http-errors");
+const express = require("express");
+const path = require("path");
+const cookieParser = require("cookie-parser");
+const logger = require("morgan");
 
-const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
+const indexRouter = require("./routes/index");
+const usersRouter = require("./routes/users");
 
-const http = require('http');
-const websocket = require('ws');
+const http = require("http");
+const websocket = require("ws");
 
-const Game = require('./game');
+const crypto = require("crypto");
+
+const Game = require("./game");
 
 const app = express();
 const PORT = process.argv[2] || 3000;
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
+app.set("views", path.join(__dirname, "views"));
+app.set("view engine", "ejs");
 
-app.use(logger('dev'));
+app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, "public")));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use("/", indexRouter);
+app.use("/users", usersRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -37,26 +39,19 @@ app.use(function (req, res, next) {
 app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+  res.locals.error = req.app.get("env") === "development" ? err : {};
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.render("error");
 });
 
 const server = http.createServer(app);
 const wss = new websocket.Server({ server });
 
-// LCG id numbers for semi-random id's
-const a = 25214903917;
-const c = 11;
-const m = Math.pow(2, 48);
-let seedGame = Date.now();
-let seedSession = Date.now() + 28411;
-
-function generateId(seed) {
-  seed = (a * seed + c) % m;
-  return seed;
+function generateId() {
+  const buf = crypto.randomBytes(6);
+  return parseInt(buf.join("")).toString(36);
 }
 
 const games = [];
@@ -93,16 +88,14 @@ function getGame(id) {
 
 // Create a new game for the given client
 function createGame(ws, message) {
-  seedGame = generateId(seedGame);
-  const game = new Game(seedGame.toString(36), message.game);
+  const game = new Game(generateId(), message.game);
   games.push(game);
   return { id: game.id };
 }
 
 // Create a new session identifier for the given client
 function createSession(ws) {
-  seedSession = generateId(seedSession);
-  return { id: seedSession.toString(36) };
+  return { id: generateId() };
 }
 
 // Sends all games with required data to the given client
@@ -127,6 +120,9 @@ function sendGames(ws) {
 // If the game is full, the client becomes a spectator
 function joinGame(ws, message) {
   const game = getGame(message.game);
+  if (game == null) {
+    return;
+  }
 
   const player = {
     ws,
@@ -137,7 +133,7 @@ function joinGame(ws, message) {
   game.addPlayer(player);
 }
 
-// Handle request from a client
+// Handle request from the given client
 function handleRequest(ws, message) {
   let response = null;
   const key = message.key;
