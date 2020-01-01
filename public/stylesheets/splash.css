@@ -74,6 +74,10 @@ main {
   border-radius: 5px 5px 0 0;
 }
 
+#games > #list-header > .item > div:hover {
+  cursor: pointer;
+}
+
 #games > #list {
   height: 100%;
 
@@ -107,7 +111,7 @@ main {
   align-items: center;
 }
 
-#create > * {
+#create > div {
   width: 25%;
   height: 70%;
 
@@ -126,12 +130,12 @@ main {
   border-radius: 5px;
 }
 
-#create > *:hover {
+#create > div:hover {
   transform: translateY(.2em);
   box-shadow: 0 .3em var(--play-button-shadow);
 }
 
-#create > *:active {
+#create > div:active {
   transform: translateY(.45em);
   box-shadow: 0 0em var(--play-button-color);
   background-color: var(--play-button-shadow);
@@ -163,6 +167,7 @@ main {
   content: "▼";
   position: absolute;
   right: 1ch;
+  animation: rotateToDown 1s ease-in-out forwards;
 }
 
 #list > .item > .visibility {
@@ -184,4 +189,22 @@ main {
 
 #list > .item > .time {
   grid-area: time; 
+}
+
+@keyframes rotateToUp {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(180deg);
+  }
+}
+
+@keyframes rotateToDown {
+  0% {
+    transform: rotate(180deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
 }
