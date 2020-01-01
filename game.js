@@ -1,3 +1,5 @@
+const Yinsh = require("./yinsh.js");
+
 class Game {
   constructor(publicId, privateId, type) {
     this.publicId = publicId;
@@ -8,6 +10,8 @@ class Game {
     this.player1 = null;
     this.player2 = null;
     this.spectators = [];
+
+    this.yinsh = new Yinsh();
   }
 
   isFull() {
@@ -29,6 +33,26 @@ class Game {
       this.startTime = Date.now();
       this.player1.ws.send(JSON.stringify({ id: this.player2.id }));
       this.player2.ws.send(JSON.stringify({ id: this.player1.id }));
+
+      this.yinsh.setSides(this.player1, this.player2);
+      this.yinsh.sendTurnRequest(this.yinsh.players[0]);
+    }
+  }
+
+  handleMove(from, to) {
+    const valid = this.yinsh.validateMove(from, to);
+    if (valid) {
+      checkForWin();
+
+      const message = JSON.stringify({ key: "boardUpdate", data: this.yinsh.getBoardJSON() });
+      this.player1.ws.send(message);
+      this.player1.ws.send(message);
+      for (let i = 0; i < this.spectators.length; i++) {
+        this.spectators[i].ws.send(message);
+      }
+
+    } else {
+
     }
   }
 }

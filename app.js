@@ -179,6 +179,10 @@ function handleRequest(ws, message) {
       response = getPrivateId(ws, data);
       break;
 
+    case "turnResponse":
+      getGamePrivate(data.game).handleMove(data.from, data.to);
+      break;
+
     default:
       console.log(`Unexpected request: ${message.data}`);
       break;
