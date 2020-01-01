@@ -1,21 +1,25 @@
+import Socket from "./socket.js"
+
 const SOCKET_URL = "ws://localhost:3000";
 
 const AVAILABILITY = { "open": 0, "private": 1, "full": 2 };
 const ICONS = ["&#x1f513;", "&#x1f510;", "&#x1f441"];
 
 onload = () => {
-  const socket = new WebSocket(SOCKET_URL);
+  const socket = new Socket(new WebSocket(SOCKET_URL));
 
+  // Add a game item to the list
   const addGameItem = (gameId, availability, player1, player2, elapsedTime) => {
-    const time = Math.floor(elapsedTime / 3600 % 60).toString().padStart(2, '0')
+    const time = Math.floor(elapsedTime / 3600).toString().padStart(2, '0')
       + ":" + Math.floor(elapsedTime / 60 % 60).toString().padStart(2, '0')
       + ":" + (elapsedTime % 60).toString().padStart(2, '0');
 
     const item = document.createElement("div");
-    item.onclick = () => window.location.assign(`game.html?id=${gameId}`);
+
+    item.onclick = () => socket.send("public", { id: gameId });
     item.className = "item";
     item.innerHTML = `
-      <div class="visibility" alt="join">${ICONS[AVAILABILITY[availability]]}</div>
+      <div class="visibility" alt="join" title="${availability}">${ICONS[AVAILABILITY[availability]]}</div>
       <div class="player">${clean(player1 || '-')}</div>
       <div class="player">${clean(player2 || '-')}</div>
       <div class="player-count">${(player1 ? 1 : 0) + (player2 ? 1 : 0)}/2</div>
@@ -24,8 +28,10 @@ onload = () => {
     document.querySelector("#list").appendChild(item);
   };
 
+  // Clean player name to prevent HTML injection
   const clean = str => str.replace("<", "&lt;").replace(">", "&gt;");
 
+  // Refresh the list of game items
   const refreshGameItems = games => {
     const list = document.querySelector("#list");
     const buttons = list.children[0];
@@ -36,35 +42,32 @@ onload = () => {
     }
   };
 
-  socket.onopen = e => {
-    socket.send(JSON.stringify({ type: "session" }));
-    socket.send(JSON.stringify({ type: "games" }));
+  socket.ws.onopen = () => {
+    socket.send("session", {});
+    socket.send("games", {});
     setInterval(() => {
-      socket.send(JSON.stringify({ type: "games" }));
+      socket.send("games", {});
     }, 1000);
   };
 
-  socket.onmessage = message => {
-    const response = JSON.parse(message.data);
-    if (response.type == "games") {
-      refreshGameItems(response.games);
-    } else if (response.type == "session") {
-      sessionStorage.setItem("id", response.id);
-    }
-  }
+  socket.setReceive("games", data => {
+    refreshGameItems(data.games);
+  });
+
+  socket.setReceive("session", data => {
+    sessionStorage.setItem("id", data.id);
+  });
+
+  socket.setReceive("public", data => {
+    window.location.assign(`game?id=${data.id}`);
+  });
+
+  socket.setReceive("create", data => {
+    socket.send("public", { id: data.id });
+  });
 
   const createGame = game => {
-    const properties = {
-      type: "create",
-      game
-    };
-
-    socket.send(JSON.stringify(properties));
-
-    socket.onmessage = message => {
-      const response = JSON.parse(message.data);
-      window.location.assign(`game.html?id=${response.id}`);
-    }
+    socket.send("create", { game });
   }
 
   document.querySelector("#public").onclick = () => createGame("public");

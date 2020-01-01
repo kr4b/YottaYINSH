@@ -1,62 +1,46 @@
-const createError = require('http-errors');
-const express = require('express');
-const path = require('path');
-const cookieParser = require('cookie-parser');
-const logger = require('morgan');
+const createError = require("http-errors");
+const express = require("express");
+const path = require("path");
+const cookieParser = require("cookie-parser");
+const logger = require("morgan");
 
-const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
+const http = require("http");
+const websocket = require("ws");
 
-const http = require('http');
-const websocket = require('ws');
+const crypto = require("crypto");
+const querystring = require("querystring");
 
-const Game = require('./game');
+const Game = require("./game");
 
 const app = express();
 const PORT = process.argv[2] || 3000;
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
+app.set("views", path.join(__dirname, "views"));
+app.set("view engine", "ejs");
 
-app.use(logger('dev'));
+app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, "public")));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
-
-// catch 404 and forward to error handler
 app.use(function (req, res, next) {
-  next(createError(404));
-});
-
-// error handler
-app.use(function (err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+  const gameId = req.query.id;
+  const game = getGamePrivate(gameId);
+  if (game == null || req.path != "/game") {
+    res.render("splash", {});
+  } else {
+    res.render("game", {});
+  }
 });
 
 const server = http.createServer(app);
 const wss = new websocket.Server({ server });
 
-// LCG id numbers for semi-random id's
-const a = 25214903917;
-const c = 11;
-const m = Math.pow(2, 48);
-let seedGame = Date.now();
-let seedSession = Date.now() + 28411;
-
-function generateId(seed) {
-  seed = (a * seed + c) % m;
-  return seed;
+function generateId() {
+  const buf = crypto.randomBytes(6);
+  return parseInt(buf.join("")).toString(36);
 }
 
 const games = [];
@@ -80,10 +64,21 @@ setInterval(() => {
   })
 }, 10000);
 
-// Gets a game by game id (id in URL)
-function getGame(id) {
+// Gets a game by public game id
+function getGamePublic(id) {
   for (let game of games) {
-    if (game.id == id) {
+    if (game.publicId == id) {
+      return game;
+    }
+  }
+
+  return null;
+}
+
+// Gets a game by private game id (id in URL)
+function getGamePrivate(id) {
+  for (let game of games) {
+    if (game.privateId == id) {
       return game;
     }
   }
@@ -93,18 +88,14 @@ function getGame(id) {
 
 // Create a new game for the given client
 function createGame(ws, message) {
-  seedGame = generateId(seedGame);
-  const game = new Game(seedGame.toString(36), message.game);
-  const response = JSON.stringify({ id: game.id });
-  ws.send(response);
+  const game = new Game(generateId(), generateId(), message.game);
   games.push(game);
+  return { id: game.publicId };
 }
 
 // Create a new session identifier for the given client
 function createSession(ws) {
-  seedSession = generateId(seedSession);
-  const response = JSON.stringify({ type: "session", id: seedSession.toString(36) });
-  ws.send(response);
+  return { id: generateId() };
 }
 
 // Sends all games with required data to the given client
@@ -113,7 +104,7 @@ function sendGames(ws) {
   const gamesList = [];
   for (let game of games) {
     const gameData = {
-      id: game.id,
+      id: game.publicId,
       availability: game.isFull() ? "full" : game.type == "private" ? "private" : "open",
       player1: game.player1 ? game.player1.id : null,
       player2: game.player2 ? game.player2.id : null,
@@ -122,13 +113,20 @@ function sendGames(ws) {
     gamesList.push(gameData);
   }
 
-  ws.send(JSON.stringify({ type: "games", games: gamesList }));
+  return { games: gamesList };
 }
 
 // Let the given client join the game
 // If the game is full, the client becomes a spectator
 function joinGame(ws, message) {
-  const game = getGame(message.game);
+  const game = getGamePrivate(message.game);
+
+  if (game == null) {
+    return null;
+  }
+
+  let role = "waiting";
+  if (game.isFull()) role = "spectating";
 
   const player = {
     ws,
@@ -137,30 +135,57 @@ function joinGame(ws, message) {
   };
   players.push(player);
   game.addPlayer(player);
+
+  if (game.isFull()) role = "playing";
+
+  return { role };
 }
 
-// Handle request from a client
+// Attempts to get the private game id if allowed
+function getPrivateId(ws, message) {
+  const game = getGamePublic(message.id);
+
+  if (game == null || (game.type == "private" && !game.isFull() && game.player1 != null)) {
+    return null;
+  }
+
+  return { id: game.privateId };
+}
+
+// Handle request from the given client
 function handleRequest(ws, message) {
-  switch (message.type) {
+  let response = null;
+  const key = message.key;
+  const data = message.data;
+
+  switch (key) {
     case "games":
-      sendGames(ws);
+      response = sendGames(ws);
       break;
 
     case "create":
-      createGame(ws, message);
+      response = createGame(ws, data);
       break;
 
     case "join":
-      joinGame(ws, message);
+      response = joinGame(ws, data);
       break;
 
     case "session":
-      createSession(ws);
+      response = createSession(ws);
+      break;
+
+    case "public":
+      response = getPrivateId(ws, data);
       break;
 
     default:
-      console.log(`Unexpected request: ${message}`);
+      console.log(`Unexpected request: ${message.data}`);
       break;
+  }
+
+  if (response != null) {
+    ws.send(JSON.stringify({ key: key, data: response }));
   }
 }
 
