@@ -21,6 +21,7 @@ class Game {
   addPlayer(player) {
     if (this.isFull()) {
       this.spectators.push(player);
+      player.ws.send(JSON.stringify({ key: "boardUpdate", data: this.yinsh.getBoardJSON() }));
     } else if (this.player1 == null) {
       this.player1 = player;
       if (this.type == "ai") {
@@ -31,8 +32,6 @@ class Game {
     } else {
       this.player2 = player;
       this.startTime = Date.now();
-      this.player1.ws.send(JSON.stringify({ id: this.player2.id }));
-      this.player2.ws.send(JSON.stringify({ id: this.player1.id }));
 
       this.yinsh.setSides(this.player1, this.player2);
       this.yinsh.sendTurnRequest(this.yinsh.players[0]);
@@ -40,19 +39,35 @@ class Game {
   }
 
   handleMove(from, to) {
-    const valid = this.yinsh.validateMove(from, to);
-    if (valid) {
-      checkForWin();
+    let valid = false;
+    if (this.yinsh.turnCounter < 10) {
+      const side = this.yinsh.turnCounter % 2;
+      valid = this.yinsh.board.placeRing(from.vertical, from.point, side);
+    } else {
+      valid = this.yinsh.validateMove(from, to);
+      if (valid) {
+        const side = this.yinsh.turnCounter % 2 + 1;
+        checkForWin();
 
+        this.yinsh.board.moveRing(from, to);
+      }
+    }
+
+    if (valid) {
       const message = JSON.stringify({ key: "boardUpdate", data: this.yinsh.getBoardJSON() });
       this.player1.ws.send(message);
-      this.player1.ws.send(message);
+      this.player2.ws.send(message);
       for (let i = 0; i < this.spectators.length; i++) {
         this.spectators[i].ws.send(message);
       }
 
-    } else {
-
+      this.yinsh.turnCounter++;
+      const turnCounter = this.yinsh.turnCounter;
+      if (turnCounter < 10) {
+        this.yinsh.sendTurnRequest(this.yinsh.players[turnCounter % 2]);
+      } else {
+        this.yinsh.sendTurnRequest(this.yinsh.players[turnCounter % 2 + 1]);
+      }
     }
   }
 }

@@ -210,8 +210,11 @@ function handleRequest(ws, message) {
       response = getPrivateId(ws, data);
       break;
 
-    case "turnResponse":
-      getGamePrivate(data.game).handleMove(data.from, data.to);
+    case "turn":
+      const game = getGamePrivate(data.game);
+      if (game != null) {
+        game.handleMove(data.from, data.to);
+      }
       break;
 
     case "name":

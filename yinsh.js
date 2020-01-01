@@ -22,13 +22,13 @@ class Yinsh {
 
   // Lets the player know it should make a move
   sendTurnRequest(player) {
-    player.ws.send(JSON.stringify({ key: "turnRequest", data: { turnNumber: this.turnCounter } }));
+    player.ws.send(JSON.stringify({ key: "turn", data: { turnNumber: this.turnCounter } }));
   }
 
   // Checks if a move is valid
   // Arguments from and to should be { vertical: int, point: int };
   validateMove(from, to) {
-    const possiblePaths = this.board.getPossiblePaths(from.vertical, to.vertical, {});
+    const possiblePaths = this.board.getPossiblePaths(from.vertical, from.point, {});
     return possiblePaths.includes(this.board.getIndex(to.vertical, to.point));
   }
 
@@ -42,8 +42,8 @@ class Yinsh {
   // Sends the updated board data (markers and rings) to all clients
   getBoardJSON() {
     return {
-      rings: this.rings,
-      markers: this.markers
+      rings: this.board.rings,
+      markers: this.board.markers
     };
   }
 }
