@@ -69,6 +69,23 @@ main {
   position: relative;
 }
 
+#name > p {
+  font-weight: bold;
+  margin: 5px;
+  color: #2c3e50;
+}
+
+#name > input[type=text] {
+  text-align: center;
+  color: #2c3e50;
+  background: #ecf0f1;
+	border: none;
+	border-bottom: 2px solid #2c3e50;
+	outline: none;
+  font-style: italic;
+  font-weight: bold;
+}
+
 /* games */
 #games {
   width: 100%;
@@ -99,7 +116,7 @@ main {
   border-top: none;
 
   overflow-x: hidden;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 #create, .item {

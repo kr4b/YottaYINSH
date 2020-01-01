@@ -215,7 +215,7 @@ function handleRequest(ws, message) {
       break;
 
     default:
-      console.log(`Unexpected request: ${message.data}`);
+      console.log(`Unexpected request: '${message.key}'`);
       break;
   }
 

@@ -8,7 +8,11 @@ export default
     this.ws.onmessage = data => {
       const message = JSON.parse(data.data);
       const callback = this.callbacks[message.key];
-      callback(message.data);
+      if (callback == null) {
+        console.log(`No callback available for: '${message.key}'`);
+      } else {
+        callback(message.data);
+      }
     };
   }
 
