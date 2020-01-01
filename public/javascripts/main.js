@@ -26,6 +26,14 @@ onload = () => {
     socket.send("join", properties);
   };
 
+  b.placeMarker(0, 0, 0);
+  b.placeMarker(1, 2, 0);
+  b.placeMarker(2, 3, 0);
+  b.placeMarker(3, 4, 0);
+  b.placeMarker(4, 5, 0);
+  b.placeMarker(5, 5, 0);
+  console.log(b.checkFiveInRow());
+
   update();
   function update() {
 
@@ -36,7 +44,7 @@ onload = () => {
     b.ctx.strokeRect(canv.x - 3, canv.y - 3, 6, 6);
     b.ctx.strokeRect(mx - 3 - b.ctx.canvas.offsetLeft, my - 3 - b.ctx.canvas.offsetTop, 6, 6);
 
-    const possible = b.getPossiblePaths(yinsh.vertical, yinsh.point);
+    const possible = b.getPossiblePaths(yinsh.vertical, yinsh.point, {});
     for (let index of possible) {
       const vertical = (index / 11) | 0;
       const point = index % 11;
