@@ -1,5 +1,5 @@
 const Yinsh = require("./yinsh.js");
-const { BLACK, WHITE } = require("./server_constants");
+const { BLACK, WHITE } = require("./server_constants").loadConstants();
 
 class Game {
   constructor(publicId, privateId, type) {
@@ -53,7 +53,11 @@ class Game {
   }
 
   getCoord(position) {
-    return ${ position.vertical } ${ String.fromCharCode('a'.charCodeAt(0) + position.point - 1) };
+    return `${position.vertical}${String.fromCharCode('a'.charCodeAt(0) + position.point - 1)}`;
+  }
+
+  getLog(side) {
+    return `${this.getColor(side)}-${this.yinsh.turnCounter + 1}:`;
   }
 
   handleMove(data) {
@@ -69,14 +73,14 @@ class Game {
       }
 
       if (valid) {
-        log = `${this.getColor(side)}-${this.yinsh.turnCounter}: ${this.getCoord(from)}`;
+        log = `${this.getLog(side)} ${this.getCoord(from)}`;
       }
     } else if (from != undefined && to != undefined) {
       if (data.id == this.yinsh.players[side].id) {
         valid = this.yinsh.validateMove(from, to);
       }
       if (valid) {
-        log = `${this.getColor(side)}-${this.yinsh.turnCounter}: ${this.getCoord(from)}-${this.getCoord(to)}`;
+        log = `${this.getLog(side)} ${this.getCoord(from)}-${this.getCoord(to)}`;
         this.yinsh.board.moveRing(from, to);
         const rows = this.yinsh.board.checkFiveInRow();
         if (rows[side].length != 0) {
@@ -89,7 +93,7 @@ class Game {
     }
 
     if (valid) {
-      updateBoard(log);
+      this.updateBoard(log);
       this.yinsh.turnCounter++;
     }
 
@@ -108,8 +112,8 @@ class Game {
           this.yinsh.board.removeMarker(index);
         }
 
-        log = `${this.getColor(side)}-${this.yinsh.turnCounter}: x${this.getCoord(ring)}`;
-        updateBoard(log);
+        log = `${this.getLog(side)} x${this.getCoord(ring)}`;
+        this.updateBoard(log);
 
         const rows = this.yinsh.board.checkFiveInRow();
         if (rows[side].length != 0) {

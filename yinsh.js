@@ -19,15 +19,15 @@ class Yinsh {
       this.players.push(p1);
     }
 
-    this.players[0].ws.send(JSON.stringify({ key: "side", data: { side: WHITE }}));
-    this.players[1].ws.send(JSON.stringify({ key: "side", data: { side: BLACK }}));
+    this.players[0].ws.send(JSON.stringify({ key: "side", data: { side: WHITE } }));
+    this.players[1].ws.send(JSON.stringify({ key: "side", data: { side: BLACK } }));
   }
 
   getSide() {
-    if (this.yinsh.turnCounter < 10) {
-      return this.yinsh.turnCounter % 2;
+    if (this.turnCounter < 10) {
+      return this.turnCounter % 2;
     } else {
-      return this.yinsh.turnCounter % 2 + 1;
+      return (this.turnCounter + 1) % 2;
     }
   }
 
@@ -36,7 +36,7 @@ class Yinsh {
     const side = this.getSide();
     const rings = {};
     for (let ring in this.board.rings) {
-      if (this.board[ring] == side) {
+      if (this.board.rings[ring] == side) {
         const position = this.board.getPosition(ring);
         rings[ring] = this.board.getPossiblePaths(position.vertical, position.point, {});
       }

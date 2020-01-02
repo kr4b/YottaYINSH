@@ -6,6 +6,7 @@ onload = () => {
   const socket = new Socket(new WebSocket(SOCKET_URL));
   const board = new ClientBoard(document.querySelector("#yinsh-board"));
   const url = new URL(window.location);
+  const id = sessionStorage.getItem("id");
   const gameId = url.searchParams.get("id");
 
   const mouse = { x: 0, y: 0 };
@@ -51,10 +52,9 @@ onload = () => {
   });
 
   socket.ws.onopen = () => {
-    const sessionId = sessionStorage.getItem("id");
     const properties = {
       game: gameId,
-      id: sessionId,
+      id,
     };
     socket.send("join", properties);
   };
@@ -72,7 +72,7 @@ onload = () => {
 
       if (turnType == TURN_TYPE["ring"]) {
         board.validateRing(mouse.x, mouse.y, (vertical, point) => {
-          socket.send("turn", { game: gameId, from: { vertical, point } });
+          socket.send("turn", { id, game: gameId, from: { vertical, point } });
           turnType = TURN_TYPE["none"];
           cancelAnimationFrame(animationFrame);
         });
@@ -87,6 +87,7 @@ onload = () => {
 
             if (pathsPerRing[targetRing.vertical * 11 + targetRing.point].includes(index)) {
               socket.send("turn", {
+                id,
                 game: gameId,
                 from: targetRing,
                 to: { vertical, point }
