@@ -1,5 +1,5 @@
 const Yinsh = require("./yinsh.js");
-const { BLACK, WHITE } = require("./server_constants").loadConstants();
+const { BLACK, WHITE, INTERSECTIONS, POINT_OFFSET } = require("./server_constants").loadConstants();
 
 class Game {
   constructor(publicId, privateId, type) {
@@ -53,7 +53,7 @@ class Game {
   }
 
   getCoord(position) {
-    return `${position.vertical}${String.fromCharCode('a'.charCodeAt(0) + position.point - 1)}`;
+    return `${INTERSECTIONS[position.vertical] - position.point + POINT_OFFSET[position.vertical]}${String.fromCharCode('a'.charCodeAt(0) + position.vertical)}`;
   }
 
   getLog(side) {
@@ -119,7 +119,6 @@ class Game {
       const sides = [BLACK, WHITE];
 
       for (let side of sides) {
-        // const side = this.yinsh.getSide();
         const rows = this.yinsh.board.checkFiveInRow();
 
         let valid = rows[side].some(value => value.every(index => row.includes(index)));
