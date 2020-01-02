@@ -37,8 +37,9 @@ onload = () => {
   });
 
   socket.setReceive("boardUpdate", data => {
-    board.rings = data.rings;
-    board.markers = data.markers;
+    board.rings = data.board.rings;
+    board.markers = data.board.markers;
+    console.log(data.log);
     board.render();
   });
 

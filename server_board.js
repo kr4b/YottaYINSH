@@ -43,22 +43,7 @@ class ServerBoard {
     return true;
   }
 
-  placeMarker(vertical, point, side) {
-    const index = this.getIndex(vertical, point);
-    if (index < 0 || this.markers[index] != undefined) return false;
-    this.markers[index] = side;
-    return true;
-  }
-
-  flipMarker(vertical, point) {
-    const index = this.getIndex(vertical, point);
-    if (index < 0 || this.markers[index] == undefined) return false;
-    this.markers[index] = (this.markers[index] + 1) % 2;
-    return false;
-  }
-
-  removeMarker(vertical, point) {
-    const index = this.getIndex(vertical, point);
+  removeMarker(index) {
     if (index < 0 || this.markers[index] == undefined) return false;
     delete this.markers[index];
     return true;
@@ -67,6 +52,14 @@ class ServerBoard {
   getIndex(vertical, point) {
     if (vertical == undefined || point == undefined || point < 0 || point >= INTERSECTIONS[vertical]) return -1;
     return vertical * 11 + point;
+  }
+
+  getPosition(index) {
+    if (index == undefined || index < 0) return null;
+    return {
+      vertical: Math.floor(index / 11),
+      point: index % 11,
+    };
   }
 
   getPossiblePaths(vertical, point, flipped, direction = -1, passed_marker = false) {

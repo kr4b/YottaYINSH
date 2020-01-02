@@ -189,6 +189,8 @@ function handleRequest(ws, message) {
   const key = message.key;
   const data = message.data;
 
+  if (data == null) return;
+
   switch (key) {
     case "games":
       response = sendGames(ws);
@@ -212,9 +214,7 @@ function handleRequest(ws, message) {
 
     case "turn":
       const game = getGamePrivate(data.game);
-      if (game != null) {
-        game.handleMove(data.from, data.to);
-      }
+      if (game != null) game.handleMove(data);
       break;
 
     case "name":

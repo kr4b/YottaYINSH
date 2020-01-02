@@ -20,9 +20,26 @@ class Yinsh {
     }
   }
 
-  // Lets the player know it should make a move
+  getSide() {
+    if (this.yinsh.turnCounter < 10) {
+      return this.yinsh.turnCounter % 2;
+    } else {
+      return this.yinsh.turnCounter % 2 + 1;
+    }
+  }
+
+  // Lets the player know it should make a move and what moves it can make
   sendTurnRequest(player) {
-    player.ws.send(JSON.stringify({ key: "turn", data: { turnNumber: this.turnCounter } }));
+    const side = this.getSide();
+    const rings = {};
+    for (let ring in this.board.rings) {
+      if (this.board[ring] == side) {
+        const position = this.board.getPosition(ring);
+        rings[ring] = this.board.getPossiblePaths(position.vertical, position.point, {});
+      }
+    }
+
+    player.ws.send(JSON.stringify({ key: "turn", data: { turnNumber: this.turnCounter, rings } }));
   }
 
   // Checks if a move is valid
@@ -30,13 +47,6 @@ class Yinsh {
   validateMove(from, to) {
     const possiblePaths = this.board.getPossiblePaths(from.vertical, from.point, {});
     return possiblePaths.includes(this.board.getIndex(to.vertical, to.point));
-  }
-
-  // Checks if a player has five markers in a row
-  // If that is the case, TODO
-  checkForWin() {
-    const rows = this.board.checkFiveInRow();
-
   }
 
   // Sends the updated board data (markers and rings) to all clients

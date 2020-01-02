@@ -1,4 +1,5 @@
 const Yinsh = require("./yinsh.js");
+const { BLACK, WHITE } = require("./server_constants");
 
 class Game {
   constructor(publicId, privateId, type) {
@@ -38,35 +39,85 @@ class Game {
     }
   }
 
-  handleMove(from, to) {
-    let valid = false;
-    if (this.yinsh.turnCounter < 10) {
-      const side = this.yinsh.turnCounter % 2;
-      valid = this.yinsh.board.placeRing(from.vertical, from.point, side);
-    } else {
-      valid = this.yinsh.validateMove(from, to);
-      if (valid) {
-        const side = this.yinsh.turnCounter % 2 + 1;
-        checkForWin();
+  updateBoard(log) {
+    const message = JSON.stringify({ key: "boardUpdate", data: { board: this.yinsh.getBoardJSON(), log } });
+    this.player1.ws.send(message);
+    this.player2.ws.send(message);
+    for (let i = 0; i < this.spectators.length; i++) {
+      this.spectators[i].ws.send(message);
+    }
+  }
 
+  getColor(side) {
+    return side == BLACK ? "BLACK" : "WHITE";
+  }
+
+  getCoord(position) {
+    return ${ position.vertical } ${ String.fromCharCode('a'.charCodeAt(0) + position.point - 1) };
+  }
+
+  handleMove(data) {
+    const from = data.from;
+    const to = data.to;
+    const side = this.yinsh.getSide();
+
+    let valid = false;
+    let log = "";
+    if (this.yinsh.turnCounter < 10 && from != undefined) {
+      if (data.id == this.yinsh.players[side].id) {
+        valid = this.yinsh.board.placeRing(from.vertical, from.point, side);
+      }
+
+      if (valid) {
+        log = `${this.getColor(side)}-${this.yinsh.turnCounter}: ${this.getCoord(from)}`;
+      }
+    } else if (from != undefined && to != undefined) {
+      if (data.id == this.yinsh.players[side].id) {
+        valid = this.yinsh.validateMove(from, to);
+      }
+      if (valid) {
+        log = `${this.getColor(side)}-${this.yinsh.turnCounter}: ${this.getCoord(from)}-${this.getCoord(to)}`;
         this.yinsh.board.moveRing(from, to);
+        const rows = this.yinsh.board.checkFiveInRow();
+        if (rows[side].length != 0) {
+          this.yinsh.players[side].ws.send(JSON.stringify({ key: "row", data: rows[side] }));
+        } else {
+          const otherSide = (side + 1) % 2;
+          this.yinsh.players[otherSide].ws.send(JSON.stringify({ key: "row", data: rows[otherSide] }));
+        }
       }
     }
 
     if (valid) {
-      const message = JSON.stringify({ key: "boardUpdate", data: this.yinsh.getBoardJSON() });
-      this.player1.ws.send(message);
-      this.player2.ws.send(message);
-      for (let i = 0; i < this.spectators.length; i++) {
-        this.spectators[i].ws.send(message);
-      }
-
+      updateBoard(log);
       this.yinsh.turnCounter++;
-      const turnCounter = this.yinsh.turnCounter;
-      if (turnCounter < 10) {
-        this.yinsh.sendTurnRequest(this.yinsh.players[turnCounter % 2]);
-      } else {
-        this.yinsh.sendTurnRequest(this.yinsh.players[turnCounter % 2 + 1]);
+    }
+
+    this.yinsh.sendTurnRequest(this.yinsh.players[this.yinsh.getSide()]);
+  }
+
+  handleRingRemove(data) {
+    const row = data.row;
+    const ring = data.ring;
+
+    if (this.yinsh.turnCounter >= 10 && row != undefined && ring != undefined) {
+      const side = this.yinsh.getSide();
+      const rows = this.yinsh.board.checkFiveInRow();
+      if (rows[side].includes(row) && this.yinsh.board.removeRing(ring.vertical, ring.point)) {
+        for (let index of row) {
+          this.yinsh.board.removeMarker(index);
+        }
+
+        log = `${this.getColor(side)}-${this.yinsh.turnCounter}: x${this.getCoord(ring)}`;
+        updateBoard(log);
+
+        const rows = this.yinsh.board.checkFiveInRow();
+        if (rows[side].length != 0) {
+          this.yinsh.players[side].ws.send(JSON.stringify({ key: "row", data: rows[side] }));
+        } else {
+          const otherSide = (side + 1) % 2;
+          this.yinsh.players[otherSide].ws.send(JSON.stringify({ key: "row", data: rows[otherSide] }));
+        }
       }
     }
   }
