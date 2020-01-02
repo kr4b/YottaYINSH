@@ -71,8 +71,6 @@ export default
   }
 
   render() {
-    this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-
     const drawTriangle = (point, dirx, diry) => {
       this.ctx.beginPath();
       this.ctx.moveTo(point.x, point.y);
@@ -159,6 +157,27 @@ export default
       this.ctx.fillStyle = side == BLACK ? '#111' : '#ddd';
       this.ctx.beginPath();
       this.ctx.arc(coord.x, coord.y, this.ringSize, 0, Math.PI * 2);
+      this.ctx.fill();
+    }
+
+    this.ctx.fillStyle = fillStyle;
+    this.ctx.globalAlpha = globalAlpha;
+  }
+
+  highlightRow(row, outline) {
+    const fillStyle = this.ctx.fillStyle;
+    const globalAlpha = this.ctx.globalAlpha;
+
+    this.ctx.fillStyle = "#e67e22";
+    if (outline) this.ctx.globalAlpha = .5;
+    
+    for (let index of row) {
+      const vertical = (parseInt(index) / 11) | 0;
+      const point = parseInt(index) % 11;
+
+      const { x, y } = this.getCanvasCoordinate(vertical, point);
+      this.ctx.beginPath();
+      this.ctx.arc(x, y, this.ringSize * 1.2, 0, Math.PI * 2);
       this.ctx.fill();
     }
 

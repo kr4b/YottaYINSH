@@ -12,7 +12,9 @@ onload = () => {
   const mouse = { x: 0, y: 0 };
   let animationFrame = null;
   let pathsPerRing = null;
+  let possibleRows = [];
   let targetRing = null;
+  let rowToRemove = null;
 
   let side = 2;
   let role = ROLES["waiting"];
@@ -26,6 +28,13 @@ onload = () => {
     side = data.side;
   });
 
+  socket.setReceive("row", data => {
+    possibleRows = data;
+    turnType = TURN_TYPE["remove"];
+    targetRing = null;
+    rowToRemove = null;
+  });
+
   socket.setReceive("turn", data => {
     if (data.turnNumber < 10) {
       turnType = TURN_TYPE["ring"];
@@ -37,17 +46,13 @@ onload = () => {
       pathsPerRing = data.rings;
       cancelAnimationFrame(animationFrame);
       animationFrame = requestAnimationFrame(update);
-      // socket.send("turn", {
-      //   game: gameId,
-      //   from: { vertical: 0, point: 0 },
-      //   to: { vertical: 5, point: 5 }
-      // });
     }
   });
 
   socket.setReceive("boardUpdate", data => {
     board.rings = data.board.rings;
     board.markers = data.board.markers;
+    update();
     console.log(data.log);
   });
 
@@ -92,14 +97,63 @@ onload = () => {
                 from: targetRing,
                 to: { vertical, point }
               });
+              turnType = TURN_TYPE["none"];
+              cancelAnimationFrame(animationFrame);
             }
           });
+        }
+      }
+
+      if (turnType == TURN_TYPE["remove"]) {
+        const { vertical, point } = board.nearestYinshCoordinate(mouse.x, mouse.y);
+        const index = vertical * 11 + point;
+
+        if (board.rings[index] == side) targetRing = index;
+        else {
+          let amount = 0;
+          for (let row of possibleRows) {
+            if (row.includes(index)) {
+              amount++;
+              rowToRemove = row;
+            }
+          }
+  
+          if (amount != 1) {
+            rowToRemove = null;
+          }
+        }
+
+        if (targetRing != null && rowToRemove != null) {
+          socket.send("row", {
+            id,
+            game: gameId,
+            row: rowToRemove,
+            ring: {
+              vertical: (targetRing / 11) | 0,
+              point: targetRing % 11
+            }
+          });
+          turnType = TURN_TYPE["none"];
+          cancelAnimationFrame(animationFrame);
         }
       }
     }
   }
 
   function update() {
+    board.ctx.clearRect(0, 0, board.ctx.canvas.width, board.ctx.canvas.height);
+
+    if (turnType == TURN_TYPE["remove"]) {
+      const { vertical, point } = board.nearestYinshCoordinate(mouse.x, mouse.y);
+      const index = vertical * 11 + point;
+
+      for (let row of possibleRows) board.highlightRow(row, !row.includes(index));
+      if (board.rings[index] == side) board.highlightRow([index], true);
+
+      if (targetRing != null) board.highlightRow([targetRing], false);
+      if (rowToRemove != null) board.highlightRow(rowToRemove, false);
+    }
+
     board.render();
 
     if (turnType == TURN_TYPE["ring"])

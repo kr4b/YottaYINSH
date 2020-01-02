@@ -212,14 +212,21 @@ function handleRequest(ws, message) {
       response = getPrivateId(ws, data);
       break;
 
-    case "turn":
+    case "turn": {
       const game = getGamePrivate(data.game);
       if (game != null) game.handleMove(data);
       break;
+    }
 
     case "name":
       setName(ws, data);
       break;
+
+    case "row": {
+      const game = getGamePrivate(data.game);
+      if (game != null) game.handleRingRemove(data);
+      break;
+    }
 
     default:
       console.log(`Unexpected request: '${message.key}'`);

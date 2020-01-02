@@ -104,38 +104,44 @@ class ServerBoard {
 
   // Returns for white and black the possible rows
   checkFiveInRow() {
-    const recursiveCheck = (index, side, out, counter = 1, prev = []) => {
-      const vertical = (index / 11) | 0;
-      const point = index % 11;
-      const neighbours = [
-        this.getIndex(vertical, point - 1),
-        this.getIndex(vertical + 1, point + Math.floor((INTERSECTIONS[vertical + 1] - INTERSECTIONS[vertical]) / 2)),
-        this.getIndex(vertical + 1, point + Math.floor((INTERSECTIONS[vertical + 1] - INTERSECTIONS[vertical]) / 2) + 1),
-      ];
-
-      prev.push(index);
-
-      if (this.markers[index] != side) return 0;
-      else if (counter > 5) return counter;
-      else out.push(index);
-
-      for (let i in neighbours) {
-        if (neighbours[i] >= 0 && this.markers[neighbours[i]] == side && !prev.includes(neighbours[i])) {
-          counter = recursiveCheck(neighbours[i], side, out, counter + 1, prev);
-        }
+    const getNextPosition = (vertical, point, direction) => {
+      switch (direction) {
+        case 0: return { vertical: vertical, point: point - 1 };
+        case 1: return { vertical: vertical + 1, point: point + Math.floor((INTERSECTIONS[vertical + 1] - INTERSECTIONS[vertical]) / 2) };
+        case 2: return { vertical: vertical + 1, point: point + Math.floor((INTERSECTIONS[vertical + 1] - INTERSECTIONS[vertical]) / 2) + 1 };
       }
+    };
 
-      return counter;
-    }
+    const recursiveCheck = (vertical, point, side, direction, counter) => {
+      const next = getNextPosition(vertical, point, direction);
+      const index = this.getIndex(vertical, point);
+
+      if (index < 0 || this.markers[index] != side) return [];
+      if (counter > 5) return [];
+      if (this.markers[index] == side) {
+        return [index].concat(recursiveCheck(next.vertical, next.point, side, direction, counter + 1));
+      }
+    };
 
     const out = {};
     out[BLACK] = [];
     out[WHITE] = [];
 
     for (let index in this.markers) {
-      const tmp = [];
-      recursiveCheck(parseInt(index), 0, tmp);
-      if (tmp.length == 5) out[this.markers[index]].push(tmp);
+      const vertical = (parseInt(index) / 11) | 0;
+      const point = parseInt(index) % 11;
+
+      const results = [
+        recursiveCheck(vertical, point, this.markers[index], 0, 1),
+        recursiveCheck(vertical, point, this.markers[index], 1, 1),
+        recursiveCheck(vertical, point, this.markers[index], 2, 1)
+      ];
+
+      for (let result of results) {
+        if (result.length == 5) {
+          out[this.markers[index]].push(result);
+        }
+      }
     }
 
     return out;
