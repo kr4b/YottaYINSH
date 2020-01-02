@@ -1,9 +1,6 @@
 import Socket from "./socket.js"
+import { SOCKET_URL, AVAILABILITY, ICONS } from "./client_constants.js";
 
-const SOCKET_URL = "ws://localhost:3000";
-
-const AVAILABILITY = { "open": 0, "private": 1, "full": 2 };
-const ICONS = ["&#x1f513;", "&#x1f510;", "&#x1f441"];
 
 onload = () => {
   const socket = new Socket(new WebSocket(SOCKET_URL));

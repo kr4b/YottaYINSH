@@ -1,5 +1,5 @@
 const ServerBoard = require("./server_board.js");
-const { BLACK, WHITE } = require("./server_constants");
+const { BLACK, WHITE } = require("./server_constants").loadConstants();
 
 class Yinsh {
 
@@ -18,6 +18,9 @@ class Yinsh {
       this.players.push(p2);
       this.players.push(p1);
     }
+
+    this.players[0].ws.send(JSON.stringify({ key: "side", data: { side: WHITE }}));
+    this.players[1].ws.send(JSON.stringify({ key: "side", data: { side: BLACK }}));
   }
 
   getSide() {

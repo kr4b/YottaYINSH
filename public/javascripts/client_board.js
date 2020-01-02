@@ -2,15 +2,33 @@ import { BLACK, WHITE, INTERSECTIONS } from "./client_constants.js";
 
 // Board class for the client side
 export default
-class ClientBoard {
+  class ClientBoard {
 
   constructor(canvas) {
     if (canvas instanceof HTMLCanvasElement) {
       this.ctx = canvas.getContext('2d');
+
+      this.rings = {};
+      this.markers = {};
+
       this.resize();
     } else {
       throw "Invalid argument";
     }
+  }
+
+  validateRing(x, y, callback) {
+    const { vertical, point, distance } = this.nearestYinshCoordinate(x, y);
+    const index = vertical * 11 + point;
+    if (this.rings[index] == undefined && this.markers[index] == undefined && distance <= this.ringSize)
+      callback(vertical, point);
+  }
+
+  validateMarker(x, y, side, callback) {
+    const { vertical, point, distance } = this.nearestYinshCoordinate(x, y);
+    const index = vertical * 11 + point;
+    if (this.rings[index] == side && this.markers[index] == undefined && distance <= this.ringSize)
+      callback(vertical, point);
   }
 
   resize() {
@@ -19,6 +37,8 @@ class ClientBoard {
 
     this.verticalSpacing = this.ctx.canvas.height * 0.095;
     this.horizontalSpacing = this.verticalSpacing / 2 * Math.sqrt(3);
+
+    this.ringSize = this.horizontalSpacing * .45;
 
     this.render();
   }
@@ -90,31 +110,59 @@ class ClientBoard {
       }
     }
 
-    this.ctx.save();
-    this.ctx.lineWidth = 10;
     for (let key in this.rings) {
       const vertical = (key / 11) | 0;
       const point = key % 11;
-      const coord = this.getCanvasCoordinate(vertical, point);
 
-      this.ctx.strokeStyle = this.rings[key] == BLACK ? '#111' : '#ddd';
-      this.ctx.beginPath();
-      this.ctx.arc(coord.x, coord.y, this.horizontalSpacing * .35, 0, Math.PI * 2);
-      this.ctx.stroke();
+      this.drawRing(vertical, point, this.rings[key], false);
     }
-    this.ctx.restore();
 
-    this.ctx.save();
     for (let key in this.markers) {
       const vertical = (key / 11) | 0;
       const point = key % 11;
+  
+      this.drawMarker(vertical, point, this.markers[key], false);
+    }
+  }
+
+  drawRing(vertical, point, side, outline) {
+    const lineWidth = this.ctx.lineWidth;
+    const strokeStyle = this.ctx.strokeStyle;
+    const globalAlpha = this.ctx.globalAlpha;
+
+    {
+      this.ctx.lineWidth = 10;
       const coord = this.getCanvasCoordinate(vertical, point);
 
-      this.ctx.fillStyle = this.markers[key] == BLACK ? '#111' : '#ddd';
+      if (outline) this.ctx.globalAlpha = .5;
+
+      this.ctx.strokeStyle = side == BLACK ? '#111' : '#ddd';
       this.ctx.beginPath();
-      this.ctx.arc(coord.x, coord.y, this.horizontalSpacing * .35, 0, Math.PI * 2);
+      this.ctx.arc(coord.x, coord.y, this.ringSize, 0, Math.PI * 2);
+      this.ctx.stroke();
+    }
+
+    this.ctx.lineWidth = lineWidth;
+    this.ctx.strokeStyle = strokeStyle;
+    this.ctx.globalAlpha = globalAlpha;
+  }
+
+  drawMarker(vertical, point, side, outline) {
+    const fillStyle = this.ctx.fillStyle;
+    const globalAlpha = this.ctx.globalAlpha;
+
+    {
+      const coord = this.getCanvasCoordinate(vertical, point);
+
+      if (outline) this.ctx.globalAlpha = .5;
+
+      this.ctx.fillStyle = side == BLACK ? '#111' : '#ddd';
+      this.ctx.beginPath();
+      this.ctx.arc(coord.x, coord.y, this.ringSize, 0, Math.PI * 2);
       this.ctx.fill();
     }
-    this.ctx.restore();
+
+    this.ctx.fillStyle = fillStyle;
+    this.ctx.globalAlpha = globalAlpha;
   }
 }
