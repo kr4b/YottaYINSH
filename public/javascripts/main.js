@@ -1,35 +1,38 @@
 import Board from "./board.js"
+import Socket from "./socket.js"
 
 const SOCKET_URL = "ws://localhost:3000";
 const ROLES = { "waiting": 0, "playing": 1, "spectating": 2 };
 let mx = 0, my = 0;
 
 onload = () => {
-  const socket = new WebSocket(SOCKET_URL)
+  const socket = new Socket(new WebSocket(SOCKET_URL));
   const b = new Board(document.getElementById("yinsh-board"));
   let role = ROLES["waiting"];
   b.render();
 
-  socket.onopen = e => {
+  socket.setReceive("join", data => {
+    role = ROLES[data.role];
+  });
+
+  socket.ws.onopen = () => {
     const sessionId = sessionStorage.getItem("id");
     const url = new URL(window.location);
     const gameId = url.searchParams.get("id");
     const properties = {
-      type: "join",
       game: gameId,
       id: sessionId,
     };
-    socket.send(JSON.stringify(properties));
+    socket.send("join", properties);
   };
 
-  socket.onmessage = message => {
-    const response = JSON.parse(message.data);
-    if (response.type == "start") {
-      role = ROLES[response.role];
-    } else {
-      console.log(response);
-    }
-  };
+  b.placeMarker(0, 0, 0);
+  b.placeMarker(1, 2, 0);
+  b.placeMarker(2, 3, 0);
+  b.placeMarker(3, 4, 0);
+  b.placeMarker(4, 5, 0);
+  b.placeMarker(5, 5, 0);
+  console.log(b.checkFiveInRow());
 
   update();
   function update() {
@@ -41,7 +44,7 @@ onload = () => {
     b.ctx.strokeRect(canv.x - 3, canv.y - 3, 6, 6);
     b.ctx.strokeRect(mx - 3 - b.ctx.canvas.offsetLeft, my - 3 - b.ctx.canvas.offsetTop, 6, 6);
 
-    const possible = b.getPossiblePaths(yinsh.vertical, yinsh.point);
+    const possible = b.getPossiblePaths(yinsh.vertical, yinsh.point, {});
     for (let index of possible) {
       const vertical = (index / 11) | 0;
       const point = index % 11;

@@ -1,6 +1,7 @@
 class Game {
-  constructor(id, type) {
-    this.id = id;
+  constructor(publicId, privateId, type) {
+    this.publicId = publicId;
+    this.privateId = privateId;
     this.type = type;
     this.startTime = null;
 
@@ -18,6 +19,11 @@ class Game {
       this.spectators.push(player);
     } else if (this.player1 == null) {
       this.player1 = player;
+      if (this.type == "ai") {
+        this.player2 = {
+          name: "&#x1F4BB; (AI)",
+        };
+      }
     } else {
       this.player2 = player;
       this.startTime = Date.now();

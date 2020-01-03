@@ -20,13 +20,14 @@ body {
   padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
   color: var(--text-color-dark);
-  background:
+  /* background:
     radial-gradient(var(--background-color2) 15%, transparent 16%) 0 0,
     radial-gradient(var(--background-color2) 15%, transparent 16%) 8px 8px,
     radial-gradient(var(--background-color3) 15%, transparent 20%) 0 1px,
     radial-gradient(var(--background-color3) 15%, transparent 20%) 8px 9px;
   background-color: var(--background-color1);
-  background-size:16px 16px;
+  background-size:16px 16px; */
+  background: var(--background-color1) url("../images/noise.png");
 }
 
 a {
