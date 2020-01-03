@@ -1,10 +1,15 @@
-const { BLACK, WHITE, INTERSECTIONS } = require('./server_constants').loadConstants();
+const { BLACK, WHITE, INTERSECTIONS } = require("./server_constants").loadConstants();
 
 class ServerBoard {
 
   constructor() {
     this.rings = {};
     this.markers = {};
+
+    this.ringsRemoved = {
+      WHITE: 2,
+      BLACK: 2
+    };
   }
 
   placeRing(vertical, point, side) {
@@ -106,9 +111,9 @@ class ServerBoard {
   checkFiveInRow() {
     const getNextPosition = (vertical, point, direction) => {
       switch (direction) {
-        case 0: return { vertical: vertical, point: point - 1 };
-        case 1: return { vertical: vertical + 1, point: point + Math.floor((INTERSECTIONS[vertical + 1] - INTERSECTIONS[vertical]) / 2) };
-        case 2: return { vertical: vertical + 1, point: point + Math.floor((INTERSECTIONS[vertical + 1] - INTERSECTIONS[vertical]) / 2) + 1 };
+      case 0: return { vertical: vertical, point: point - 1 };
+      case 1: return { vertical: vertical + 1, point: point + Math.floor((INTERSECTIONS[vertical + 1] - INTERSECTIONS[vertical]) / 2) };
+      case 2: return { vertical: vertical + 1, point: point + Math.floor((INTERSECTIONS[vertical + 1] - INTERSECTIONS[vertical]) / 2) + 1 };
       }
     };
 

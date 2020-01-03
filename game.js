@@ -1,5 +1,5 @@
 const Yinsh = require("./yinsh.js");
-const { BLACK, WHITE, INTERSECTIONS, POINT_OFFSET } = require("./server_constants").loadConstants();
+const { BLACK, INTERSECTIONS, POINT_OFFSET } = require("./server_constants").loadConstants();
 
 class Game {
   constructor(publicId, privateId, type) {
@@ -53,7 +53,7 @@ class Game {
   }
 
   getCoord(position) {
-    return `${INTERSECTIONS[position.vertical] - position.point + POINT_OFFSET[position.vertical]}${String.fromCharCode('a'.charCodeAt(0) + position.vertical)}`;
+    return `${INTERSECTIONS[position.vertical] - position.point + POINT_OFFSET[position.vertical]}${String.fromCharCode("a".charCodeAt(0) + position.vertical)}`;
   }
 
   getLog(side) {
@@ -116,9 +116,10 @@ class Game {
     let foundRow = false;
 
     if (this.yinsh.turnCounter >= 10 && row != undefined && ring != undefined) {
-      const sides = [BLACK, WHITE];
+      let activeSide = this.yinsh.getSide();
 
-      for (let side of sides) {
+      for (let i = 0; i < 2; i++) {
+        const side = (activeSide + i) % 2;
         const rows = this.yinsh.board.checkFiveInRow();
 
         let valid = rows[side].some(value => value.every(index => row.includes(index)));
@@ -127,9 +128,14 @@ class Game {
           for (let index of row) {
             this.yinsh.board.removeMarker(index);
           }
-
+          
           let log = `${this.getLog(side)} x${this.getCoord(ring)}`;
           this.updateBoard(log);
+          
+          this.yinsh.board.ringsRemoved[side] += 1;
+          if (this.yinsh.board.ringsRemoved[side] == 3) {
+            console.log("win");
+          }
 
           const rows = this.yinsh.board.checkFiveInRow();
           if (rows[side].length != 0) {

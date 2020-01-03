@@ -1,14 +1,16 @@
-import Socket from "./socket.js"
+import Socket from "./socket.js";
 import ClientBoard from "./client_board.js";
 import { SOCKET_URL, ROLES, TURN_TYPE } from "./client_constants.js";
 
 onload = () => {
+  // Constant values
   const socket = new Socket(new WebSocket(SOCKET_URL));
   const board = new ClientBoard(document.querySelector("#yinsh-board"));
   const url = new URL(window.location);
   const id = sessionStorage.getItem("id");
   const gameId = url.searchParams.get("id");
 
+  // Variables to help with board interaction
   const mouse = { x: 0, y: 0 };
   let animationFrame = null;
   let pathsPerRing = null;
@@ -16,17 +18,16 @@ onload = () => {
   let targetRing = null;
   let rowToRemove = null;
 
+  // Variables to keep track of the game
   let side = 2;
   let role = ROLES["waiting"];
-  let turnType = TURN_TYPE["marker"];
+  let turnType = TURN_TYPE["none"];
 
   socket.setReceive("join", data => {
     role = ROLES[data.role];
+    console.log(role);
   });
-
-  socket.setReceive("side", data => {
-    side = data.side;
-  });
+  socket.setReceive("side", data => side = data.side);
 
   socket.setReceive("row", data => {
     possibleRows = data;
@@ -64,10 +65,14 @@ onload = () => {
     socket.send("join", properties);
   };
 
+  onresize = () => {
+    board.resize();
+  };
+
   onmousemove = e => {
     mouse.x = e.pageX - board.ctx.canvas.offsetLeft;
     mouse.y = e.pageY - board.ctx.canvas.offsetTop;
-  }
+  };
 
   onclick = e => {
     mouse.x = e.pageX - board.ctx.canvas.offsetLeft;
@@ -117,7 +122,7 @@ onload = () => {
               rowToRemove = row;
             }
           }
-  
+
           if (amount != 1) {
             rowToRemove = null;
           }
@@ -138,7 +143,7 @@ onload = () => {
         }
       }
     }
-  }
+  };
 
   function update() {
     board.ctx.clearRect(0, 0, board.ctx.canvas.width, board.ctx.canvas.height);
@@ -165,5 +170,5 @@ onload = () => {
     }
 
     animationFrame = requestAnimationFrame(update);
-  };
-}
+  }
+};

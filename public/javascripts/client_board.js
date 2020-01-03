@@ -1,12 +1,12 @@
-import { BLACK, WHITE, INTERSECTIONS } from "./client_constants.js";
+import { BLACK, INTERSECTIONS } from "./client_constants.js";
 
 // Board class for the client side
 export default
-  class ClientBoard {
+class ClientBoard {
 
   constructor(canvas) {
     if (canvas instanceof HTMLCanvasElement) {
-      this.ctx = canvas.getContext('2d');
+      this.ctx = canvas.getContext("2d");
 
       this.rings = {};
       this.markers = {};
@@ -17,6 +17,7 @@ export default
     }
   }
 
+  // Activates the callback when a ring can be placed near the canvas x, y
   validateRing(x, y, callback) {
     const { vertical, point, distance } = this.nearestYinshCoordinate(x, y);
     const index = vertical * 11 + point;
@@ -24,6 +25,7 @@ export default
       callback(vertical, point);
   }
 
+  // Activates the callback when a marker can be placed near the canvas x, y
   validateMarker(x, y, side, callback) {
     const { vertical, point, distance } = this.nearestYinshCoordinate(x, y);
     const index = vertical * 11 + point;
@@ -31,6 +33,7 @@ export default
       callback(vertical, point);
   }
 
+  // Resizes the spacings so the board dimensions are correct
   resize() {
     this.ctx.canvas.width = this.ctx.canvas.clientWidth;
     this.ctx.canvas.height = this.ctx.canvas.clientHeight;
@@ -43,6 +46,7 @@ export default
     this.render();
   }
 
+  // Returns the { vertical, point } closest to the { x, y }
   nearestYinshCoordinate(x, y) {
     const left = (this.ctx.canvas.width - this.horizontalSpacing * (INTERSECTIONS.length - 1)) / 2;
     const right = (this.ctx.canvas.width + this.horizontalSpacing * (INTERSECTIONS.length - 1)) / 2;
@@ -58,6 +62,7 @@ export default
     return { vertical, point, distance };
   }
 
+  // Returns the { x, y } at { vertical, point }
   getCanvasCoordinate(vertical, point) {
     if (point < 0 || point >= INTERSECTIONS[vertical]) return null;
 
@@ -70,7 +75,9 @@ export default
     return { x, y };
   }
 
+  // Renders the board, rings and markers
   render() {
+    // A function to help rendering the board
     const drawTriangle = (point, dirx, diry) => {
       this.ctx.beginPath();
       this.ctx.moveTo(point.x, point.y);
@@ -86,7 +93,7 @@ export default
       this.ctx.lineTo(point.x + this.horizontalSpacing * dirx, point.y + this.verticalSpacing / 2);
 
       this.ctx.stroke();
-    }
+    };
 
     const center = { x: this.ctx.canvas.width / 2, y: this.ctx.canvas.height / 2 };
     const half_i = (INTERSECTIONS.length / 2) | 0;
@@ -108,6 +115,7 @@ export default
       }
     }
 
+    // Render the rings
     for (let key in this.rings) {
       const vertical = (key / 11) | 0;
       const point = key % 11;
@@ -115,6 +123,7 @@ export default
       this.drawRing(vertical, point, this.rings[key], false);
     }
 
+    // Render the markers
     for (let key in this.markers) {
       const vertical = (key / 11) | 0;
       const point = key % 11;
@@ -123,6 +132,7 @@ export default
     }
   }
 
+  // Renders a ring
   drawRing(vertical, point, side, outline) {
     const lineWidth = this.ctx.lineWidth;
     const strokeStyle = this.ctx.strokeStyle;
@@ -134,7 +144,7 @@ export default
 
       if (outline) this.ctx.globalAlpha = .5;
 
-      this.ctx.strokeStyle = side == BLACK ? '#111' : '#ddd';
+      this.ctx.strokeStyle = side == BLACK ? "#111" : "#ddd";
       this.ctx.beginPath();
       this.ctx.arc(coord.x, coord.y, this.ringSize, 0, Math.PI * 2);
       this.ctx.stroke();
@@ -145,6 +155,7 @@ export default
     this.ctx.globalAlpha = globalAlpha;
   }
 
+  // Renders a ring
   drawMarker(vertical, point, side, outline) {
     const fillStyle = this.ctx.fillStyle;
     const globalAlpha = this.ctx.globalAlpha;
@@ -154,7 +165,7 @@ export default
 
       if (outline) this.ctx.globalAlpha = .5;
 
-      this.ctx.fillStyle = side == BLACK ? '#111' : '#ddd';
+      this.ctx.fillStyle = side == BLACK ? "#111" : "#ddd";
       this.ctx.beginPath();
       this.ctx.arc(coord.x, coord.y, this.ringSize, 0, Math.PI * 2);
       this.ctx.fill();
@@ -164,6 +175,7 @@ export default
     this.ctx.globalAlpha = globalAlpha;
   }
 
+  // Renders a highlight at all indexes in the row
   highlightRow(row, outline) {
     const fillStyle = this.ctx.fillStyle;
     const globalAlpha = this.ctx.globalAlpha;
