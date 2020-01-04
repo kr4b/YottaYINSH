@@ -1,5 +1,5 @@
 const Yinsh = require("./yinsh.js");
-const { BLACK, INTERSECTIONS, POINT_OFFSET } = require("./server_constants").loadConstants();
+const { WHITE, BLACK, INTERSECTIONS, POINT_OFFSET } = require("./server_constants").loadConstants();
 
 class Game {
   constructor(publicId, privateId, type) {
@@ -35,7 +35,7 @@ class Game {
       this.startTime = Date.now();
 
       this.yinsh.setSides(this.player1, this.player2);
-      this.yinsh.sendTurnRequest(this.yinsh.players[0]);
+      this.yinsh.sendTurnRequest(this.yinsh.getPlayer(WHITE));
     }
   }
 
@@ -69,7 +69,7 @@ class Game {
     let valid = false;
     let log = "";
     if (this.yinsh.turnCounter < 10 && from != undefined) {
-      if (data.id == this.yinsh.players[side].id) {
+      if (data.id == this.yinsh.getPlayer(side).id) {
         valid = this.yinsh.board.placeRing(from.vertical, from.point, side);
       }
 
@@ -77,7 +77,7 @@ class Game {
         log = `${this.getLog(side)} ${this.getCoord(from)}`;
       }
     } else if (from != undefined && to != undefined) {
-      if (data.id == this.yinsh.players[side].id) {
+      if (data.id == this.yinsh.getPlayer(side).id) {
         valid = this.yinsh.validateMove(from, to);
       }
       if (valid) {
@@ -85,12 +85,12 @@ class Game {
         this.yinsh.board.moveRing(from, to);
         const rows = this.yinsh.board.checkFiveInRow();
         if (rows[side].length != 0) {
-          this.yinsh.players[side].ws.send(JSON.stringify({ key: "row", data: rows[side] }));
+          this.yinsh.getPlayer(side).ws.send(JSON.stringify({ key: "row", data: rows[side] }));
           foundRow = true;
         }
         if (rows[(side + 1) % 2].length != 0) {
-          const otherSide = (side + 1) % 2;
-          this.yinsh.players[otherSide].ws.send(JSON.stringify({ key: "row", data: rows[otherSide] }));
+          const otherSide = side == BLACK ? WHITE : BLACK;
+          this.yinsh.getPlayer(otherSide).ws.send(JSON.stringify({ key: "row", data: rows[otherSide] }));
           foundRow = true;
         }
       }
@@ -105,7 +105,7 @@ class Game {
     }
 
     if (!foundRow) {
-      this.yinsh.sendTurnRequest(this.yinsh.players[this.yinsh.getSide()]);
+      this.yinsh.sendTurnRequest(this.yinsh.getPlayer(this.yinsh.getSide()));
     }
   }
 
@@ -132,19 +132,19 @@ class Game {
           let log = `${this.getLog(side)} x${this.getCoord(ring)}`;
           this.updateBoard(log);
           
-          this.yinsh.board.ringsRemoved[side] += 1;
-          if (this.yinsh.board.ringsRemoved[side] == 3) {
+          this.yinsh.board.setRingsRemoved(side, this.yinsh.board.getRingsRemoved(side) + 1);
+          if (this.yinsh.board.getRingsRemoved(side) == 3) {
             console.log("win");
           }
 
           const rows = this.yinsh.board.checkFiveInRow();
           if (rows[side].length != 0) {
-            this.yinsh.players[side].ws.send(JSON.stringify({ key: "row", data: rows[side] }));
+            this.yinsh.getPlayer(side).ws.send(JSON.stringify({ key: "row", data: rows[side] }));
             foundRow = true;
           }
           if (rows[(side + 1) % 2].length != 0) {
-            const otherSide = (side + 1) % 2;
-            this.yinsh.players[otherSide].ws.send(JSON.stringify({ key: "row", data: rows[otherSide] }));
+            const otherSide = side == BLACK ? WHITE : BLACK;
+            this.yinsh.getPlayer(otherSide).ws.send(JSON.stringify({ key: "row", data: rows[otherSide] }));
             foundRow = true;
           }
         }

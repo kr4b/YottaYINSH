@@ -6,10 +6,17 @@ class ServerBoard {
     this.rings = {};
     this.markers = {};
 
-    this.ringsRemoved = {
-      WHITE: 2,
-      BLACK: 2
-    };
+    this.ringsRemoved = [];
+    this.ringsRemoved[0] = 2;
+    this.ringsRemoved[1] = 2;
+  }
+
+  getRingsRemoved(side) {
+    return this.ringsRemoved[side == WHITE ? 0 : 1];
+  }
+
+  setRingsRemoved(side, value) {
+    this.ringsRemoved[side == WHITE ? 0 : 1] = value;
   }
 
   placeRing(vertical, point, side) {
@@ -129,8 +136,8 @@ class ServerBoard {
     };
 
     const out = {};
-    out[BLACK] = [];
     out[WHITE] = [];
+    out[BLACK] = [];
 
     for (let index in this.markers) {
       const vertical = (parseInt(index) / 11) | 0;

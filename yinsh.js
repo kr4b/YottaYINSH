@@ -10,6 +10,10 @@ class Yinsh {
     this.players = [];
   }
 
+  getPlayer(side) {
+    return side == WHITE ? this.players[0] : this.players[1];
+  }
+
   setSides(p1, p2) {
     if (Math.round(Math.random()) == 0) {
       this.players.push(p1);
@@ -25,9 +29,9 @@ class Yinsh {
 
   getSide() {
     if (this.turnCounter < 10) {
-      return this.turnCounter % 2;
+      return this.turnCounter % 2 == 0 ? WHITE : BLACK;
     } else {
-      return (this.turnCounter + 1) % 2;
+      return (this.turnCounter + 1) % 2 == 0 ? WHITE : BLACK;
     }
   }
 
