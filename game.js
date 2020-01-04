@@ -123,7 +123,7 @@ class Game {
     const side = this.yinsh.getSide();
 
     // Someone with an incorrect id sent a move, so ignore it
-    if (data.id != this.yinsh.players[side].id) {
+    if (data.id != this.yinsh.getPlayer(side).id) {
       return;
     }
 
@@ -132,17 +132,9 @@ class Game {
 
     // Turn counter is smaller than 10, so the move is a ring placement
     if (this.yinsh.turnCounter < 10 && from != undefined) {
-      if (data.id == this.yinsh.getPlayer(side).id) {
-        valid = this.yinsh.board.placeRing(from.vertical, from.point, side);
-      }
+      valid = this.yinsh.board.placeRing(from.vertical, from.point, side);
       if (valid) {
-        this.updateBoard(`${this.getLog(side)} ${this.getCoord(from)}`);
-      }
-    }
-    // All the rings have been put down
-    else if (from != undefined && to != undefined) {
-      if (data.id == this.yinsh.getPlayer(side).id) {
-        valid = this.yinsh.validateMove(from, to);
+        this.updateBoard(`${this.getLogPrompt(side)} ${this.getCoord(from)}`);
       }
     }
     // Turn counter is greater than or equal to 10, so the move is a ring placement
@@ -152,7 +144,7 @@ class Game {
       if (valid) {
         this.yinsh.board.moveRing(from, to);
         foundRow = this.checkFiveInRow();
-        this.updateBoard(`${this.getLog(side)} ${this.getCoord(from)}-${this.getCoord(to)}`);
+        this.updateBoard(`${this.getLogPrompt(side)} ${this.getCoord(from)}-${this.getCoord(to)}`);
       }
     }
 
@@ -196,11 +188,11 @@ class Game {
         this.yinsh.board.removeMarker(index);
       }
 
-      this.updateBoard(`${this.getLog(side)} x${this.getCoord(data.ring)}`);
+      this.updateBoard(`${this.getLogPrompt(side)} x${this.getCoord(data.ring)}`);
       this.yinsh.board.setRingsRemoved(side, this.yinsh.board.getRingsRemoved(side) + 1);
 
       if (this.yinsh.board.getRingsRemoved(side) == 3) {
-        console.log("win");
+        this.terminateGame(side);
       }
     }
   }
