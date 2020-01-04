@@ -28,12 +28,15 @@ onload = () => {
   // Clean player name to prevent HTML injection
   const clean = str => str.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-  // Refresh the list of game items
-  const refreshGameItems = games => {
+  const refreshGameItems = refreshedGames => {
     const list = document.querySelector("#list");
     const buttons = list.children[0];
     list.innerHTML = "";
     list.appendChild(buttons);
+
+    games = refreshedGames;
+    games.sort((a, b) => sortingMethod[selectedSort](a, b) * (ascendingSort ? 1 : -1));
+
     for (let game of games) {
       addGameItem(game.id, game.availability, game.player1, game.player2, game.elapsedTime);
     }
@@ -75,4 +78,24 @@ onload = () => {
   document.querySelector("#public").onclick = () => createGame("public");
   document.querySelector("#private").onclick = () => createGame("private");
   document.querySelector("#ai").onclick = () => createGame("ai");
-};
+
+  document.querySelectorAll("#list-header > .item > div").forEach(value => {
+    const array = [...value.parentElement.children];
+
+    value.onclick = () => {
+      selectedSort = array.indexOf(value);
+      ascendingSort = !ascendingSort;
+      refreshGameItems(games);
+    }
+  });
+
+  let selectedSort = 0;
+  let ascendingSort = true;
+  const sortingMethod = [
+    (a, b) => AVAILABILITY[a.availability] - AVAILABILITY[b.availability],
+    (a, b) => a.player1.localeCompare(b.player1),
+    (a, b) => a.player2.localeCompare(b.player2),
+    (a, b) => (a.player1 ? 1 : 0) + (a.player2 ? 1 : 0) - (b.player1 ? 1 : 0) + (b.player2 ? 1 : 0),
+    (a, b) => a.elapsedTime - b.elapsedTime
+  ];
+}

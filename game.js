@@ -23,20 +23,45 @@ class Game {
     if (this.isFull()) {
       this.spectators.push(player);
       player.ws.send(JSON.stringify({ key: "boardUpdate", data: this.yinsh.getBoardJSON() }));
+      return;
     } else if (this.player1 == null) {
       this.player1 = player;
       if (this.type == "ai") {
         this.player2 = {
+          ai: true,
           name: "&#x1F4BB; (AI)",
         };
+      } else {
+        return;
       }
     } else {
       this.player2 = player;
-      this.startTime = Date.now();
-
-      this.yinsh.setSides(this.player1, this.player2);
-      this.yinsh.sendTurnRequest(this.yinsh.players[0]);
     }
+
+    this.startTime = Date.now();
+
+    this.yinsh.setSides(this.player1, this.player2);
+    this.yinsh.sendTurnRequest(this.yinsh.players[0]);
+
+    const iv = setInterval(() => {
+      if (this.player1.connected == false || this.player2.connected == false) {
+        this.terminateGame();
+        clearInterval(iv);
+      }
+    }, 1000);
+
+    this.player1.ws.on("close", () => {
+      this.terminateGame()
+      clearInterval(iv);
+    });
+    if (this.player2.ws) this.player2.ws.on("close", () => {
+      this.terminateGame()
+      clearInterval(iv);
+    });
+  }
+
+  terminateGame() {
+    console.log("TERMINATE:", this.privateId);
   }
 
   updateBoard(log) {
