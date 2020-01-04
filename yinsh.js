@@ -60,7 +60,8 @@ class Yinsh {
   getBoardJSON() {
     return {
       rings: this.board.rings,
-      markers: this.board.markers
+      markers: this.board.markers,
+      ringsRemoved: this.board.ringsRemoved,
     };
   }
 }

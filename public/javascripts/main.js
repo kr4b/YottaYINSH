@@ -19,7 +19,7 @@ onload = () => {
   let rowToRemove = null;
 
   // Variables to keep track of the game
-  let side = 2;
+  let side = null;
   let role = ROLES["waiting"];
   let turnType = TURN_TYPE["none"];
 
@@ -27,7 +27,11 @@ onload = () => {
     role = ROLES[data.role];
     console.log(role);
   });
-  socket.setReceive("side", data => side = data.side);
+
+  socket.setReceive("side", data => {
+    side = data.side;
+    board.side = side;
+  });
 
   socket.setReceive("row", data => {
     possibleRows = data;
@@ -53,6 +57,7 @@ onload = () => {
   socket.setReceive("boardUpdate", data => {
     board.rings = data.board.rings;
     board.markers = data.board.markers;
+    board.ringsRemoved = data.board.ringsRemoved;
     update();
     console.log(data.log);
   });

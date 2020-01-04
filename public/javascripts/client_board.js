@@ -1,8 +1,8 @@
-import { BLACK, INTERSECTIONS } from "./client_constants.js";
+import { WHITE, BLACK, WIN_RINGS, INTERSECTIONS } from "./client_constants.js";
 
 // Board class for the client side
 export default
-class ClientBoard {
+  class ClientBoard {
 
   constructor(canvas) {
     if (canvas instanceof HTMLCanvasElement) {
@@ -10,6 +10,8 @@ class ClientBoard {
 
       this.rings = {};
       this.markers = {};
+      this.ringsRemoved = [0, 0];
+      this.side = BLACK;
 
       this.resize();
     } else {
@@ -38,10 +40,12 @@ class ClientBoard {
     this.ctx.canvas.width = this.ctx.canvas.clientWidth;
     this.ctx.canvas.height = this.ctx.canvas.clientHeight;
 
-    this.verticalSpacing = this.ctx.canvas.height * 0.095;
+    this.verticalSpacing = this.ctx.canvas.height * .095;
     this.horizontalSpacing = this.verticalSpacing / 2 * Math.sqrt(3);
 
     this.ringSize = this.horizontalSpacing * .45;
+    this.ringPadding = this.ringSize * .2 + 2;
+    this.ringWidth = this.ringSize * .3;
 
     this.render();
   }
@@ -127,9 +131,63 @@ class ClientBoard {
     for (let key in this.markers) {
       const vertical = (key / 11) | 0;
       const point = key % 11;
-  
+
       this.drawMarker(vertical, point, this.markers[key], false);
     }
+
+    if (this.side == BLACK) {
+      this.drawRemovedRings(
+        this.ctx.canvas.width - (this.ringSize * 2 + this.ringPadding) * 3,
+        this.ctx.canvas.height - (this.ringSize * 2 + this.ringPadding),
+        BLACK
+      );
+      this.drawRemovedRings(
+        this.ringPadding + this.ringSize + this.ringWidth / 2,
+        this.ringPadding + this.ringSize + this.ringWidth / 2,
+        WHITE
+      );
+    } else {
+      this.drawRemovedRings(
+        this.ringPadding + this.ringSize + this.ringWidth / 2,
+        this.ringPadding + this.ringSize + this.ringWidth / 2,
+        BLACK
+      );
+      this.drawRemovedRings(
+        this.ctx.canvas.width - (this.ringSize * 2 + this.ringPadding) * 3,
+        this.ctx.canvas.height - (this.ringSize * 2 + this.ringPadding),
+        WHITE
+      );
+    }
+  }
+
+  getRingsRemoved(side) {
+    return this.ringsRemoved[side == WHITE ? 0 : 1];
+  }
+
+  // Draws the collected rings
+  drawRemovedRings(x, y, side) {
+    const lineWidth = this.ctx.lineWidth;
+    const strokeStyle = this.ctx.strokeStyle;
+    const globalAlpha = this.ctx.globalAlpha;
+
+    this.ctx.lineWidth = this.ringWidth;
+
+    for (let i = 0; i < WIN_RINGS; i++) {
+      if (i >= this.getRingsRemoved(side)) {
+        this.ctx.globalAlpha = .5;
+        this.ctx.strokeStyle = side == BLACK ? "#111" : "#999";
+      } else {
+        this.ctx.strokeStyle = side == BLACK ? "#111" : "#ddd";
+      }
+
+      this.ctx.beginPath();
+      this.ctx.arc(x + (this.ringWidth + this.ringSize * 2 + this.ringPadding) * i, y, this.ringSize, 0, Math.PI * 2);
+      this.ctx.stroke();
+    }
+
+    this.ctx.lineWidth = lineWidth;
+    this.ctx.strokeStyle = strokeStyle;
+    this.ctx.globalAlpha = globalAlpha;
   }
 
   // Renders a ring
@@ -139,7 +197,7 @@ class ClientBoard {
     const globalAlpha = this.ctx.globalAlpha;
 
     {
-      this.ctx.lineWidth = 10;
+      this.ctx.lineWidth = this.ringWidth;
       const coord = this.getCanvasCoordinate(vertical, point);
 
       if (outline) this.ctx.globalAlpha = .5;
@@ -182,7 +240,7 @@ class ClientBoard {
 
     this.ctx.fillStyle = "#e67e22";
     if (outline) this.ctx.globalAlpha = .5;
-    
+
     for (let index of row) {
       const vertical = (parseInt(index) / 11) | 0;
       const point = parseInt(index) % 11;

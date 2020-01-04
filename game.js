@@ -34,6 +34,10 @@ class Game {
         this.player2 = {
           ai: true,
           name: "&#x1F4BB; (AI)",
+          ws: {
+            send: () => { },
+            on: () => { }
+          }
         };
       } else {
         return;
@@ -54,12 +58,12 @@ class Game {
       }
     }, 1000);
 
-    if (this.yinsh.players[WHITE].ws) this.yinsh.players[WHITE].ws.on("close", () => {
+    this.yinsh.players[WHITE].ws.on("close", () => {
       this.terminateGame(BLACK);
       clearInterval(iv);
     });
 
-    if (this.yinsh.players[BLACK].ws) this.yinsh.players[BLACK].ws.on("close", () => {
+    this.yinsh.players[BLACK].ws.on("close", () => {
       this.terminateGame(WHITE);
       clearInterval(iv);
     });
@@ -188,8 +192,8 @@ class Game {
         this.yinsh.board.removeMarker(index);
       }
 
-      this.updateBoard(`${this.getLogPrompt(side)} x${this.getCoord(data.ring)}`);
       this.yinsh.board.setRingsRemoved(side, this.yinsh.board.getRingsRemoved(side) + 1);
+      this.updateBoard(`${this.getLogPrompt(side)} x${this.getCoord(data.ring)}`);
 
       if (this.yinsh.board.getRingsRemoved(side) == 3) {
         this.terminateGame(side);
