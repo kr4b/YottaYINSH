@@ -7,9 +7,10 @@ const ICONS = ["&#x1f513;", "&#x1f510;", "&#x1f441"];
 
 onload = () => {
   const socket = new Socket(new WebSocket(SOCKET_URL));
+  let games = [];
 
   // Add a game item to the list
-  const addGameItem = (gameId, availability, player1, player2, elapsedTime) => {
+  const addGameItem = async (gameId, availability, player1, player2, elapsedTime) => {
     const time = Math.floor(elapsedTime / 3600).toString().padStart(2, '0')
       + ":" + Math.floor(elapsedTime / 60 % 60).toString().padStart(2, '0')
       + ":" + (elapsedTime % 60).toString().padStart(2, '0');
@@ -31,16 +32,15 @@ onload = () => {
   // Clean player name to prevent HTML injection
   const clean = str => str.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-  const refreshGameItems = refreshedGames => {
+  const refreshGameItems = async () => {
     const list = document.querySelector("#list");
     const buttons = list.children[0];
     list.innerHTML = "";
     list.appendChild(buttons);
 
-    games = refreshedGames;
-    games.sort((a, b) => sortingMethod[selectedSort](a, b) * (ascendingSort ? 1 : -1));
+    const localgames = Array.from(games).sort((a, b) => sortingMethod[selectedSort](a, b) * (ascendingSort ? 1 : -1));
 
-    for (let game of games) {
+    for (let game of localgames) {
       addGameItem(game.id, game.availability, game.player1, game.player2, game.elapsedTime);
     }
   };
@@ -59,7 +59,8 @@ onload = () => {
   };
 
   socket.setReceive("games", data => {
-    refreshGameItems(data.games);
+    games = data.games;
+    refreshGameItems();
   });
 
   socket.setReceive("session", data => {
@@ -82,13 +83,15 @@ onload = () => {
   document.querySelector("#private").onclick = () => createGame("private");
   document.querySelector("#ai").onclick = () => createGame("ai");
 
-  document.querySelectorAll("#list-header > .item > div").forEach(value => {
-    const array = [...value.parentElement.children];
-
+  document.querySelectorAll("#list-header > .item > div").forEach((value, key) => {
     value.onclick = () => {
-      selectedSort = array.indexOf(value);
-      ascendingSort = !ascendingSort;
-      refreshGameItems(games);
+      if (selectedSort == key)
+        ascendingSort = !ascendingSort;
+      else {
+        selectedSort = key;
+        ascendingSort = true;
+      }
+      refreshGameItems();
     }
   });
 
