@@ -164,7 +164,7 @@ export default
     return this.ringsRemoved[side == WHITE ? 0 : 1];
   }
 
-  // Draws the collected rings
+  // Renders the collected rings
   drawRemovedRings(x, y, side) {
     const lineWidth = this.ctx.lineWidth;
     const strokeStyle = this.ctx.strokeStyle;
@@ -180,9 +180,10 @@ export default
         this.ctx.strokeStyle = side == BLACK ? "#111" : "#ddd";
       }
 
-      this.ctx.beginPath();
-      this.ctx.arc(x + (this.ringWidth + this.ringSize * 2 + this.ringPadding) * i, y, this.ringSize, 0, Math.PI * 2);
-      this.ctx.stroke();
+      this.drawSingleRing(
+        x + (this.ringWidth + this.ringSize * 2 + this.ringPadding) * i,
+        y
+      );
     }
 
     this.ctx.lineWidth = lineWidth;
@@ -203,9 +204,7 @@ export default
       if (outline) this.ctx.globalAlpha = .5;
 
       this.ctx.strokeStyle = side == BLACK ? "#111" : "#ddd";
-      this.ctx.beginPath();
-      this.ctx.arc(coord.x, coord.y, this.ringSize, 0, Math.PI * 2);
-      this.ctx.stroke();
+      this.drawSingleRing(coord.x, coord.y);
     }
 
     this.ctx.lineWidth = lineWidth;
@@ -213,7 +212,14 @@ export default
     this.ctx.globalAlpha = globalAlpha;
   }
 
-  // Renders a ring
+  // Renders a single ring
+  drawSingleRing(x, y) {
+    this.ctx.beginPath();
+    this.ctx.arc(x, y, this.ringSize, 0, Math.PI * 2);
+    this.ctx.stroke();
+  }
+
+  // Renders a marker
   drawMarker(vertical, point, side, outline) {
     const fillStyle = this.ctx.fillStyle;
     const globalAlpha = this.ctx.globalAlpha;
