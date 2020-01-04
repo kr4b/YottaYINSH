@@ -1,13 +1,14 @@
 const Yinsh = require("./yinsh.js");
-const { BLACK, INTERSECTIONS, POINT_OFFSET } = require("./server_constants").loadConstants();
+const { WHITE, BLACK, INTERSECTIONS, POINT_OFFSET } = require("./server_constants").loadConstants();
 
 class Game {
-  constructor(publicId, privateId, type) {
+  constructor(publicId, privateId, type, terminateCallback) {
     this.publicId = publicId;
     this.privateId = privateId;
     this.type = type;
-    this.startTime = null;
+    this.terminateCallback = terminateCallback;
 
+    this.startTime = null;
     this.player1 = null;
     this.player2 = null;
     this.spectators = [];
@@ -47,34 +48,55 @@ class Game {
     this.yinsh.sendTurnRequest(this.yinsh.players[0]);
 
     const iv = setInterval(() => {
-      if (this.player1.connected == false || this.player2.connected == false) {
-        this.terminateGame();
+      if (this.yinsh.players[WHITE].connected == false || this.yinsh.players[BLACK].connected == false) {
+        this.terminateGame(this.yinsh.players[WHITE].connected ? BLACK : WHITE);
         clearInterval(iv);
       }
     }, 1000);
 
-    this.player1.ws.on("close", () => {
-      this.terminateGame()
+    if (this.yinsh.players[WHITE].ws) this.yinsh.players[WHITE].ws.on("close", () => {
+      this.terminateGame(BLACK);
       clearInterval(iv);
     });
-    if (this.player2.ws) this.player2.ws.on("close", () => {
-      this.terminateGame()
+
+    if (this.yinsh.players[BLACK].ws) this.yinsh.players[BLACK].ws.on("close", () => {
+      this.terminateGame(WHITE);
       clearInterval(iv);
     });
   }
 
-  terminateGame() {
-    console.log("Terminate:", this.privateId);
+  // Terminates the game and sends all players a terminate request
+  terminateGame(winner) {
+    const message = {
+      key: "terminate",
+      data: {
+        winner
+      }
+    };
+    this.messagePlayers(message);
+    this.terminateCallback(this.privateId);
   }
 
-  // Sends an updated board to all players and spectators together with a log of the move made
-  updateBoard(log) {
-    const message = JSON.stringify({ key: "boardUpdate", data: { board: this.yinsh.getBoardJSON(), log } });
+  // Sends a message (Object) to all players and spectators together
+  messagePlayers(message) {
+    message = JSON.stringify(message);
     this.player1.ws.send(message);
     this.player2.ws.send(message);
     for (let i = 0; i < this.spectators.length; i++) {
       this.spectators[i].ws.send(message);
     }
+  }
+
+  // Sends an updated board to all players and spectators together with a log of the move made
+  updateBoard(log) {
+    const message = {
+      key: "boardUpdate",
+      data: {
+        board: this.yinsh.getBoardJSON(),
+        log
+      }
+    };
+    this.messagePlayers(message);
   }
 
   // Gets the color of a given side

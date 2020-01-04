@@ -59,6 +59,16 @@ setInterval(() => {
   }
 }, 10000);
 
+// Delete game with the given private id
+function deleteGame(privateId) {
+  for (let i = 0; i < games.length; i++) {
+    if (games[i].privateId == privateId) {
+      games.splice(i);
+      break;
+    }
+  }
+}
+
 // Gets a game by public game id
 function getGamePublic(id) {
   for (let game of games) {
@@ -94,7 +104,7 @@ function getPlayer(id) {
 
 // Create a new game for the given client
 function createGame(ws, message) {
-  const game = new Game(generateId(), generateId(), message.game);
+  const game = new Game(generateId(), generateId(), message.game, deleteGame);
   games.push(game);
   return { id: game.publicId };
 }
