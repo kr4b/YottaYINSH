@@ -88,6 +88,10 @@ onload = () => {
         selectedSort = key;
         ascendingSort = true;
       }
+
+      if (ascendingSort) value.classList.add("ascending")
+      else value.classList.remove("ascending");
+
       refreshGameItems();
     }
   });
@@ -96,9 +100,9 @@ onload = () => {
   let ascendingSort = true;
   const sortingMethod = [
     (a, b) => AVAILABILITY[a.availability] - AVAILABILITY[b.availability],
-    (a, b) => a.player1.localeCompare(b.player1),
-    (a, b) => a.player2.localeCompare(b.player2),
-    (a, b) => (a.player1 ? 1 : 0) + (a.player2 ? 1 : 0) - (b.player1 ? 1 : 0) + (b.player2 ? 1 : 0),
+    (a, b) => (a.player1 && b.player1) ? a.player1.localeCompare(b.player1) : !a.player1 ? 1 : !b.player2 ? -1 : 0,
+    (a, b) => (a.player2 && b.player2) ? a.player2.localeCompare(b.player2) : !a.player2 ? 1 : !b.player2 ? -1 : 0,
+    (a, b) => (a.player1 ? 1 : 0) + (a.player2 ? 1 : 0) - (b.player1 ? 1 : 0) - (b.player2 ? 1 : 0),
     (a, b) => a.elapsedTime - b.elapsedTime
   ];
 }

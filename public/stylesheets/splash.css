@@ -196,10 +196,10 @@ main {
 }
 
 #list-header > .item > div::after {
-  content: "▼";
+  content: "▲";
   position: absolute;
   right: 1ch;
-  animation: rotateToDown 1s ease-in-out forwards;
+  height: 3ex;
 }
 
 #list > .item > .visibility {
@@ -221,6 +221,14 @@ main {
 
 #list > .item > .time {
   grid-area: time; 
+}
+
+#list-header > .item > div.ascending::after {
+  animation: rotateToUp .3s ease-in-out forwards;
+}
+
+#list-header > .item > div:not(.ascending)::after {
+  animation: rotateToDown .3s ease-in-out forwards;
 }
 
 @keyframes rotateToUp {
