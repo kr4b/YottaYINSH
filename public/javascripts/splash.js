@@ -1,9 +1,6 @@
-import Socket from "./socket.js"
+import Socket from "./socket.js";
+import { SOCKET_URL, AVAILABILITY, ICONS } from "./client_constants.js";
 
-const SOCKET_URL = "ws://localhost:3000";
-
-const AVAILABILITY = { "open": 0, "private": 1, "full": 2 };
-const ICONS = ["&#x1f513;", "&#x1f510;", "&#x1f441"];
 
 onload = () => {
   const socket = new Socket(new WebSocket(SOCKET_URL));
@@ -11,9 +8,9 @@ onload = () => {
 
   // Add a game item to the list
   const addGameItem = async (gameId, availability, player1, player2, elapsedTime) => {
-    const time = Math.floor(elapsedTime / 3600).toString().padStart(2, '0')
-      + ":" + Math.floor(elapsedTime / 60 % 60).toString().padStart(2, '0')
-      + ":" + (elapsedTime % 60).toString().padStart(2, '0');
+    const time = Math.floor(elapsedTime / 3600).toString().padStart(2, "0")
+      + ":" + Math.floor(elapsedTime / 60 % 60).toString().padStart(2, "0")
+      + ":" + (elapsedTime % 60).toString().padStart(2, "0");
 
     const item = document.createElement("div");
 
@@ -21,8 +18,8 @@ onload = () => {
     item.className = "item";
     item.innerHTML = `
       <div class="visibility" alt="join" title="${availability}">${ICONS[AVAILABILITY[availability]]}</div>
-      <div class="player">${clean(player1 || '-')}</div>
-      <div class="player">${clean(player2 || '-')}</div>
+      <div class="player">${clean(player1 || "-")}</div>
+      <div class="player">${clean(player2 || "-")}</div>
       <div class="player-count">${(player1 ? 1 : 0) + (player2 ? 1 : 0)}/2</div>
       <div class="time">${time}</div>
     `;

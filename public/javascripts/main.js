@@ -1,66 +1,181 @@
-import Board from "./board.js"
-import Socket from "./socket.js"
-
-const SOCKET_URL = "ws://localhost:3000";
-const ROLES = { "waiting": 0, "playing": 1, "spectating": 2 };
-let mx = 0, my = 0;
+import Socket from "./socket.js";
+import ClientBoard from "./client_board.js";
+import { SOCKET_URL, ROLES, TURN_TYPE } from "./client_constants.js";
 
 onload = () => {
+  // Constant values
   const socket = new Socket(new WebSocket(SOCKET_URL));
-  const b = new Board(document.getElementById("yinsh-board"));
+  const board = new ClientBoard(document.querySelector("#yinsh-board"));
+  const url = new URL(window.location);
+  const id = sessionStorage.getItem("id");
+  const gameId = url.searchParams.get("id");
+
+  // Variables to help with board interaction
+  const mouse = { x: 0, y: 0 };
+  let animationFrame = null;
+  let pathsPerRing = null;
+  let possibleRows = [];
+  let targetRing = null;
+  let rowToRemove = null;
+
+  // Variables to keep track of the game
+  let side = 2;
   let role = ROLES["waiting"];
-  b.render();
+  let turnType = TURN_TYPE["none"];
 
   socket.setReceive("join", data => {
     role = ROLES[data.role];
+    console.log(role);
+  });
+  socket.setReceive("side", data => side = data.side);
+
+  socket.setReceive("row", data => {
+    possibleRows = data;
+    turnType = TURN_TYPE["remove"];
+    targetRing = null;
+    rowToRemove = null;
   });
 
+  socket.setReceive("turn", data => {
+    if (data.turnNumber < 10) {
+      turnType = TURN_TYPE["ring"];
+      cancelAnimationFrame(animationFrame);
+      animationFrame = requestAnimationFrame(update);
+    } else {
+      turnType = TURN_TYPE["marker"];
+      targetRing = null;
+      pathsPerRing = data.rings;
+      cancelAnimationFrame(animationFrame);
+      animationFrame = requestAnimationFrame(update);
+    }
+  });
+
+  socket.setReceive("boardUpdate", data => {
+    board.rings = data.board.rings;
+    board.markers = data.board.markers;
+    update();
+    console.log(data.log);
+  });
+
+  socket.setReceive("terminate", data => {
+    console.log(data.winner);
+    setTimeout(() => {
+      window.location.assign("/");
+    }, 10000);
+  })
+
   socket.ws.onopen = () => {
-    const sessionId = sessionStorage.getItem("id");
-    const url = new URL(window.location);
-    const gameId = url.searchParams.get("id");
     const properties = {
       game: gameId,
-      id: sessionId,
+      id,
     };
     socket.send("join", properties);
   };
 
-  b.placeMarker(0, 0, 0);
-  b.placeMarker(1, 2, 0);
-  b.placeMarker(2, 3, 0);
-  b.placeMarker(3, 4, 0);
-  b.placeMarker(4, 5, 0);
-  b.placeMarker(5, 5, 0);
-  console.log(b.checkFiveInRow());
+  onresize = () => {
+    board.resize();
+  };
 
-  update();
+  onmousemove = e => {
+    mouse.x = e.pageX - board.ctx.canvas.offsetLeft;
+    mouse.y = e.pageY - board.ctx.canvas.offsetTop;
+  };
+
+  onclick = e => {
+    mouse.x = e.pageX - board.ctx.canvas.offsetLeft;
+    mouse.y = e.pageY - board.ctx.canvas.offsetTop;
+
+    if (e.button == 0) {
+
+      if (turnType == TURN_TYPE["ring"]) {
+        board.validateRing(mouse.x, mouse.y, (vertical, point) => {
+          socket.send("turn", { id, game: gameId, from: { vertical, point } });
+          turnType = TURN_TYPE["none"];
+          cancelAnimationFrame(animationFrame);
+        });
+      }
+
+      if (turnType == TURN_TYPE["marker"]) {
+        board.validateMarker(mouse.x, mouse.y, side, (vertical, point) => targetRing = { vertical, point });
+
+        if (targetRing != null) {
+          board.validateRing(mouse.x, mouse.y, (vertical, point) => {
+            const index = vertical * 11 + point;
+
+            if (pathsPerRing[targetRing.vertical * 11 + targetRing.point].includes(index)) {
+              socket.send("turn", {
+                id,
+                game: gameId,
+                from: targetRing,
+                to: { vertical, point }
+              });
+              turnType = TURN_TYPE["none"];
+              cancelAnimationFrame(animationFrame);
+            }
+          });
+        }
+      }
+
+      if (turnType == TURN_TYPE["remove"]) {
+        const { vertical, point } = board.nearestYinshCoordinate(mouse.x, mouse.y);
+        const index = vertical * 11 + point;
+
+        if (board.rings[index] == side) targetRing = index;
+        else {
+          let amount = 0;
+          for (let row of possibleRows) {
+            if (row.includes(index)) {
+              amount++;
+              rowToRemove = row;
+            }
+          }
+
+          if (amount != 1) {
+            rowToRemove = null;
+          }
+        }
+
+        if (targetRing != null && rowToRemove != null) {
+          socket.send("row", {
+            id,
+            game: gameId,
+            row: rowToRemove,
+            ring: {
+              vertical: (targetRing / 11) | 0,
+              point: targetRing % 11
+            }
+          });
+          turnType = TURN_TYPE["none"];
+          cancelAnimationFrame(animationFrame);
+        }
+      }
+    }
+  };
+
   function update() {
+    board.ctx.clearRect(0, 0, board.ctx.canvas.width, board.ctx.canvas.height);
 
-    b.render();
+    if (turnType == TURN_TYPE["remove"]) {
+      const { vertical, point } = board.nearestYinshCoordinate(mouse.x, mouse.y);
+      const index = vertical * 11 + point;
 
-    const yinsh = b.nearestYinshCoordinate(mx - b.ctx.canvas.offsetLeft, my - b.ctx.canvas.offsetTop);
-    const canv = b.getCanvasCoordinate(yinsh.vertical, yinsh.point);
-    b.ctx.strokeRect(canv.x - 3, canv.y - 3, 6, 6);
-    b.ctx.strokeRect(mx - 3 - b.ctx.canvas.offsetLeft, my - 3 - b.ctx.canvas.offsetTop, 6, 6);
+      for (let row of possibleRows) board.highlightRow(row, !row.includes(index));
+      if (board.rings[index] == side) board.highlightRow([index], true);
 
-    const possible = b.getPossiblePaths(yinsh.vertical, yinsh.point, {});
-    for (let index of possible) {
-      const vertical = (index / 11) | 0;
-      const point = index % 11;
-      const coord = b.getCanvasCoordinate(vertical, point);
-      b.ctx.fillRect(coord.x - 6, coord.y - 6, 12, 12);
+      if (targetRing != null) board.highlightRow([targetRing], false);
+      if (rowToRemove != null) board.highlightRow(rowToRemove, false);
     }
 
-    requestAnimationFrame(update);
-  }
+    board.render();
 
-  onresize = () => {
-    b.resize();
-  }
-}
+    if (turnType == TURN_TYPE["ring"])
+      board.validateRing(mouse.x, mouse.y, (vertical, point) => board.drawRing(vertical, point, side, true));
+    else if (turnType == TURN_TYPE["marker"]) {
+      board.validateMarker(mouse.x, mouse.y, side, (vertical, point) => board.drawMarker(vertical, point, side, true));
 
-onmousemove = e => {
-  mx = e.pageX;
-  my = e.pageY;
-}
+      if (targetRing != null) board.drawMarker(targetRing.vertical, targetRing.point, side, true);
+    }
+
+    animationFrame = requestAnimationFrame(update);
+  }
+};

@@ -1,4 +1,3 @@
-const createError = require("http-errors");
 const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
@@ -8,7 +7,6 @@ const http = require("http");
 const websocket = require("ws");
 
 const crypto = require("crypto");
-const querystring = require("querystring");
 
 const Game = require("./game");
 
@@ -25,7 +23,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use(function (req, res, next) {
+app.use(function (req, res) {
   const gameId = req.query.id;
   const game = getGamePrivate(gameId);
   if (game == null || req.path != "/game") {
@@ -48,21 +46,28 @@ const players = [];
 
 // Close clients that don't respond within 10 seconds
 setInterval(() => {
-  wss.clients.forEach(ws => {
+  for (let player of players) {
+    const ws = player.ws;
     if (ws.alive === false) {
-      for (let player of players) {
-        if (ws == player) {
-          player.connected = false;
-          break;
-        }
-      }
       ws.terminate();
+      player.connected = false;
+      break;
     }
 
     ws.alive = false;
     ws.ping();
-  })
+  }
 }, 10000);
+
+// Delete game with the given private id
+function deleteGame(privateId) {
+  for (let i = 0; i < games.length; i++) {
+    if (games[i].privateId == privateId) {
+      games.splice(i);
+      break;
+    }
+  }
+}
 
 // Gets a game by public game id
 function getGamePublic(id) {
@@ -99,19 +104,19 @@ function getPlayer(id) {
 
 // Create a new game for the given client
 function createGame(ws, message) {
-  const game = new Game(generateId(), generateId(), message.game);
+  const game = new Game(generateId(), generateId(), message.game, deleteGame);
   games.push(game);
   return { id: game.publicId };
 }
 
 // Create a new session identifier for the given client
-function createSession(ws) {
+function createSession() {
   return { id: generateId() };
 }
 
 // Sends all games with required data to the given client
 // availability, player1, player2, elapsedTime
-function sendGames(ws) {
+function sendGames() {
   const gamesList = [];
   for (let game of games) {
     const gameData = {
@@ -148,6 +153,9 @@ function joinGame(ws, message) {
       connected: true
     };
     players.push(player);
+  } else {
+    player.ws = ws;
+    player.connected = true;
   }
   game.addPlayer(player);
 
@@ -179,7 +187,7 @@ function setName(ws, data) {
     };
     players.push(player);
   } else {
-    player.name = data.name
+    player.name = data.name;
   }
 }
 
@@ -188,6 +196,8 @@ function handleRequest(ws, message) {
   let response = null;
   const key = message.key;
   const data = message.data;
+
+  if (data == null) return;
 
   switch (key) {
     case "games":
@@ -210,9 +220,21 @@ function handleRequest(ws, message) {
       response = getPrivateId(ws, data);
       break;
 
+    case "turn": {
+      const game = getGamePrivate(data.game);
+      if (game != null) game.handleMove(data);
+      break;
+    }
+
     case "name":
       setName(ws, data);
       break;
+
+    case "row": {
+      const game = getGamePrivate(data.game);
+      if (game != null) game.handleRingRemove(data);
+      break;
+    }
 
     default:
       console.log(`Unexpected request: '${message.key}'`);

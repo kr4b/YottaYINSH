@@ -1,7 +1,7 @@
 // Do not override onmessage
 // Overriding onopen is allowed
 export default
-  class Socket {
+class Socket {
   constructor(ws) {
     this.ws = ws;
     this.callbacks = [];
