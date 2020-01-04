@@ -63,7 +63,7 @@ setInterval(() => {
 function deleteGame(privateId) {
   for (let i = 0; i < games.length; i++) {
     if (games[i].privateId == privateId) {
-      games.splice(i);
+      games.splice(i, 1);
       break;
     }
   }
