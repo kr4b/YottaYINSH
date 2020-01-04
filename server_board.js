@@ -6,9 +6,7 @@ class ServerBoard {
     this.rings = {};
     this.markers = {};
 
-    this.ringsRemoved = [];
-    this.ringsRemoved[0] = 2;
-    this.ringsRemoved[1] = 2;
+    this.ringsRemoved = [0, 0];
   }
 
   getRingsRemoved(side) {
@@ -118,9 +116,9 @@ class ServerBoard {
   checkFiveInRow() {
     const getNextPosition = (vertical, point, direction) => {
       switch (direction) {
-      case 0: return { vertical: vertical, point: point - 1 };
-      case 1: return { vertical: vertical + 1, point: point + Math.floor((INTERSECTIONS[vertical + 1] - INTERSECTIONS[vertical]) / 2) };
-      case 2: return { vertical: vertical + 1, point: point + Math.floor((INTERSECTIONS[vertical + 1] - INTERSECTIONS[vertical]) / 2) + 1 };
+        case 0: return { vertical: vertical, point: point - 1 };
+        case 1: return { vertical: vertical + 1, point: point + Math.floor((INTERSECTIONS[vertical + 1] - INTERSECTIONS[vertical]) / 2) };
+        case 2: return { vertical: vertical + 1, point: point + Math.floor((INTERSECTIONS[vertical + 1] - INTERSECTIONS[vertical]) / 2) + 1 };
       }
     };
 
