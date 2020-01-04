@@ -148,12 +148,12 @@ class Game {
         this.yinsh.board.moveRing(from, to);
         const rows = this.yinsh.board.checkFiveInRow();
         if (rows[side].length != 0) {
-          this.yinsh.players[side].ws.send(JSON.stringify({ key: "row", data: rows[side] }));
+          this.yinsh.getPlayer(side).ws.send(JSON.stringify({ key: "row", data: rows[side] }));
           foundRow = true;
         }
         if (rows[(side + 1) % 2].length != 0) {
-          const otherSide = (side + 1) % 2;
-          this.yinsh.players[otherSide].ws.send(JSON.stringify({ key: "row", data: rows[otherSide] }));
+          const otherSide = side == BLACK ? WHITE : BLACK;
+          this.yinsh.getPlayer(otherSide).ws.send(JSON.stringify({ key: "row", data: rows[otherSide] }));
           foundRow = true;
         }
       }
@@ -168,7 +168,7 @@ class Game {
     }
 
     if (!foundRow) {
-      this.yinsh.sendTurnRequest(this.yinsh.players[this.yinsh.getSide()]);
+      this.yinsh.sendTurnRequest(this.yinsh.getPlayer(this.yinsh.getSide()));
     }
   }
 
@@ -196,19 +196,19 @@ class Game {
           let log = `${this.getLogPrompt(side)} x${this.getCoord(ring)}`;
           this.updateBoard(log);
 
-          this.yinsh.board.ringsRemoved[side] += 1;
-          if (this.yinsh.board.ringsRemoved[side] == 3) {
+          this.yinsh.board.setRingsRemoved(side, this.yinsh.board.getRingsRemoved(side) + 1);
+          if (this.yinsh.board.getRingsRemoved(side) == 3) {
             console.log("win");
           }
 
           const rows = this.yinsh.board.checkFiveInRow();
           if (rows[side].length != 0) {
-            this.yinsh.players[side].ws.send(JSON.stringify({ key: "row", data: rows[side] }));
+            this.yinsh.getPlayer(side).ws.send(JSON.stringify({ key: "row", data: rows[side] }));
             foundRow = true;
           }
           if (rows[(side + 1) % 2].length != 0) {
-            const otherSide = (side + 1) % 2;
-            this.yinsh.players[otherSide].ws.send(JSON.stringify({ key: "row", data: rows[otherSide] }));
+            const otherSide = side == BLACK ? WHITE : BLACK;
+            this.yinsh.getPlayer(otherSide).ws.send(JSON.stringify({ key: "row", data: rows[otherSide] }));
             foundRow = true;
           }
         }
