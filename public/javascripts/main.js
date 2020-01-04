@@ -57,6 +57,13 @@ onload = () => {
     console.log(data.log);
   });
 
+  socket.setReceive("terminate", data => {
+    console.log(data.winner);
+    setTimeout(() => {
+      window.location.assign("/");
+    }, 10000);
+  })
+
   socket.ws.onopen = () => {
     const properties = {
       game: gameId,

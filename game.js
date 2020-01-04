@@ -2,12 +2,13 @@ const Yinsh = require("./yinsh.js");
 const { WHITE, BLACK, INTERSECTIONS, POINT_OFFSET } = require("./server_constants").loadConstants();
 
 class Game {
-  constructor(publicId, privateId, type) {
+  constructor(publicId, privateId, type, terminateCallback) {
     this.publicId = publicId;
     this.privateId = privateId;
     this.type = type;
-    this.startTime = null;
+    this.terminateCallback = terminateCallback;
 
+    this.startTime = null;
     this.player1 = null;
     this.player2 = null;
     this.spectators = [];
@@ -15,32 +16,70 @@ class Game {
     this.yinsh = new Yinsh();
   }
 
+  // Checks if the game has player1 and player2
   isFull() {
     return this.player1 != null && this.player2 != null;
   }
 
+  // Adds a player to the game in the following order
+  // player1 + AI (when applicable) -> player2 -> spectator
   addPlayer(player) {
     if (this.isFull()) {
       this.spectators.push(player);
       player.ws.send(JSON.stringify({ key: "boardUpdate", data: this.yinsh.getBoardJSON() }));
+      return;
     } else if (this.player1 == null) {
       this.player1 = player;
       if (this.type == "ai") {
         this.player2 = {
+          ai: true,
           name: "&#x1F4BB; (AI)",
         };
+      } else {
+        return;
       }
     } else {
       this.player2 = player;
-      this.startTime = Date.now();
-
-      this.yinsh.setSides(this.player1, this.player2);
-      this.yinsh.sendTurnRequest(this.yinsh.getPlayer(WHITE));
     }
+
+    this.startTime = Date.now();
+
+    this.yinsh.setSides(this.player1, this.player2);
+    this.yinsh.sendTurnRequest(this.yinsh.players[0]);
+
+    const iv = setInterval(() => {
+      if (this.yinsh.players[WHITE].connected == false || this.yinsh.players[BLACK].connected == false) {
+        this.terminateGame(this.yinsh.players[WHITE].connected ? BLACK : WHITE);
+        clearInterval(iv);
+      }
+    }, 1000);
+
+    if (this.yinsh.players[WHITE].ws) this.yinsh.players[WHITE].ws.on("close", () => {
+      this.terminateGame(BLACK);
+      clearInterval(iv);
+    });
+
+    if (this.yinsh.players[BLACK].ws) this.yinsh.players[BLACK].ws.on("close", () => {
+      this.terminateGame(WHITE);
+      clearInterval(iv);
+    });
   }
 
-  updateBoard(log) {
-    const message = JSON.stringify({ key: "boardUpdate", data: { board: this.yinsh.getBoardJSON(), log } });
+  // Terminates the game and sends all players a terminate request
+  terminateGame(winner) {
+    const message = {
+      key: "terminate",
+      data: {
+        winner
+      }
+    };
+    this.messagePlayers(message);
+    this.terminateCallback(this.privateId);
+  }
+
+  // Sends a message (Object) to all players and spectators together
+  messagePlayers(message) {
+    message = JSON.stringify(message);
     this.player1.ws.send(message);
     this.player2.ws.send(message);
     for (let i = 0; i < this.spectators.length; i++) {
@@ -48,26 +87,50 @@ class Game {
     }
   }
 
+  // Sends an updated board to all players and spectators together with a log of the move made
+  updateBoard(log) {
+    const message = {
+      key: "boardUpdate",
+      data: {
+        board: this.yinsh.getBoardJSON(),
+        log
+      }
+    };
+    this.messagePlayers(message);
+  }
+
+  // Gets the color of a given side
   getColor(side) {
     return side == BLACK ? "BLACK" : "WHITE";
   }
 
+  // Gets the string coordinate of a position { vertical, point }
   getCoord(position) {
     return `${INTERSECTIONS[position.vertical] - position.point + POINT_OFFSET[position.vertical]}${String.fromCharCode("a".charCodeAt(0) + position.vertical)}`;
   }
 
-  getLog(side) {
+  // Gets the log prompt of a given side
+  // 'COLOR-TURN:'
+  getLogPrompt(side) {
     return `${this.getColor(side)}-${this.yinsh.turnCounter + 1}:`;
   }
 
+  // Handles a players move
+  // This can be either a ring placement or a ring move
   handleMove(data) {
     const from = data.from;
     const to = data.to;
     const side = this.yinsh.getSide();
 
+    // Someone with an incorrect id sent a move, so ignore it
+    if (data.id != this.yinsh.players[side].id) {
+      return;
+    }
+
     let foundRow = false;
     let valid = false;
 
+    // Turn counter is smaller than 10, so the move is a ring placement
     if (this.yinsh.turnCounter < 10 && from != undefined) {
       if (data.id == this.yinsh.getPlayer(side).id) {
         valid = this.yinsh.board.placeRing(from.vertical, from.point, side);
@@ -81,6 +144,11 @@ class Game {
       if (data.id == this.yinsh.getPlayer(side).id) {
         valid = this.yinsh.validateMove(from, to);
       }
+    }
+    // Turn counter is greater than or equal to 10, so the move is a ring placement
+    else if (from != undefined && to != undefined) {
+      valid = this.yinsh.validateMove(from, to);
+
       if (valid) {
         this.yinsh.board.moveRing(from, to);
         foundRow = this.checkFiveInRow();
@@ -97,6 +165,7 @@ class Game {
     }
   }
 
+  // Handles ring and markers remove
   handleRingRemove(data) {
     const row = data.row;
     const ring = data.ring;

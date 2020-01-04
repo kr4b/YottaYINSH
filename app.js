@@ -46,21 +46,28 @@ const players = [];
 
 // Close clients that don't respond within 10 seconds
 setInterval(() => {
-  wss.clients.forEach(ws => {
+  for (let player of players) {
+    const ws = player.ws;
     if (ws.alive === false) {
-      for (let player of players) {
-        if (ws == player) {
-          player.connected = false;
-          break;
-        }
-      }
       ws.terminate();
+      player.connected = false;
+      break;
     }
 
     ws.alive = false;
     ws.ping();
-  });
+  }
 }, 10000);
+
+// Delete game with the given private id
+function deleteGame(privateId) {
+  for (let i = 0; i < games.length; i++) {
+    if (games[i].privateId == privateId) {
+      games.splice(i);
+      break;
+    }
+  }
+}
 
 // Gets a game by public game id
 function getGamePublic(id) {
@@ -97,7 +104,7 @@ function getPlayer(id) {
 
 // Create a new game for the given client
 function createGame(ws, message) {
-  const game = new Game(generateId(), generateId(), message.game);
+  const game = new Game(generateId(), generateId(), message.game, deleteGame);
   games.push(game);
   return { id: game.publicId };
 }
@@ -146,6 +153,9 @@ function joinGame(ws, message) {
       connected: true
     };
     players.push(player);
+  } else {
+    player.ws = ws;
+    player.connected = true;
   }
   game.addPlayer(player);
 
@@ -190,45 +200,45 @@ function handleRequest(ws, message) {
   if (data == null) return;
 
   switch (key) {
-  case "games":
-    response = sendGames(ws);
-    break;
+    case "games":
+      response = sendGames(ws);
+      break;
 
-  case "create":
-    response = createGame(ws, data);
-    break;
+    case "create":
+      response = createGame(ws, data);
+      break;
 
-  case "join":
-    response = joinGame(ws, data);
-    break;
+    case "join":
+      response = joinGame(ws, data);
+      break;
 
-  case "session":
-    response = createSession(ws);
-    break;
+    case "session":
+      response = createSession(ws);
+      break;
 
-  case "public":
-    response = getPrivateId(ws, data);
-    break;
+    case "public":
+      response = getPrivateId(ws, data);
+      break;
 
-  case "turn": {
-    const game = getGamePrivate(data.game);
-    if (game != null) game.handleMove(data);
-    break;
-  }
+    case "turn": {
+      const game = getGamePrivate(data.game);
+      if (game != null) game.handleMove(data);
+      break;
+    }
 
-  case "name":
-    setName(ws, data);
-    break;
+    case "name":
+      setName(ws, data);
+      break;
 
-  case "row": {
-    const game = getGamePrivate(data.game);
-    if (game != null) game.handleRingRemove(data);
-    break;
-  }
+    case "row": {
+      const game = getGamePrivate(data.game);
+      if (game != null) game.handleRingRemove(data);
+      break;
+    }
 
-  default:
-    console.log(`Unexpected request: '${message.key}'`);
-    break;
+    default:
+      console.log(`Unexpected request: '${message.key}'`);
+      break;
   }
 
   if (response != null) {
