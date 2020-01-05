@@ -7,8 +7,8 @@ onload = () => {
   const socket = new Socket(new WebSocket(SOCKET_URL));
   const board = new ClientBoard(document.querySelector("#yinsh-board"));
   const url = new URL(window.location);
-  const id = sessionStorage.getItem("id");
   const gameId = url.searchParams.get("id");
+  let id = sessionStorage.getItem("id");
 
   // Variables to help with board interaction
   const mouse = { x: 0, y: 0 };
@@ -67,14 +67,29 @@ onload = () => {
     setTimeout(() => {
       window.location.assign("/");
     }, 10000);
-  })
+  });
+
+  socket.setReceive("session", data => {
+    if (id == null) {
+      id = data.id;
+      sessionStorage.setItem("id", data.id);
+      socket.send("join", {
+        game: gameId,
+        id
+      });
+    }
+  });
 
   socket.ws.onopen = () => {
-    const properties = {
+    if (id == null) {
+      socket.send("session", {});
+      return;
+    }
+
+    socket.send("join", {
       game: gameId,
-      id,
-    };
-    socket.send("join", properties);
+      id
+    });
   };
 
   onresize = () => {

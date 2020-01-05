@@ -142,6 +142,10 @@ function joinGame(ws, message) {
 
   let role = "waiting";
   if (game.isFull()) role = "spectating";
+  if (message.id == null) {
+    ws.send(JSON.stringify({ key: "session", data: createSession() }));
+    return;
+  }
 
   let player = getPlayer(message.id);
   if (player == null) {
