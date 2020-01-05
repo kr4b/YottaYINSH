@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,7 +12,27 @@
 
   <script src="javascripts/main.js" type="module"></script>
 </head>
+
 <body>
-  <canvas id="yinsh-board"></canvas>
+
+  <div id="spectating">
+    <h2>&#x1f441; Spectating</h2>
+  </div>
+
+  <div class="full-size overlay" id="overlay">
+    <canvas class="full-size" id="yinsh-board"></canvas>
+  </div>
+
+  <div class="full-size">
+    <div id="waiting">
+      <h1>Waiting for opponent...</h1>
+      <p>Send someone your URL to directly invite them to this game.</p>
+      <div class="loader">
+        <div></div>
+      </div>
+    </div>
+  </div>
+
 </body>
+
 </html>

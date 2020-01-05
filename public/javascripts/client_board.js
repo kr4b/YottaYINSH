@@ -11,6 +11,8 @@ export default
       this.rings = {};
       this.markers = {};
       this.ringsRemoved = [0, 0];
+      this.name1 = "";
+      this.name2 = "";
       this.side = BLACK;
 
       this.resize();
@@ -81,6 +83,8 @@ export default
 
   // Renders the board, rings and markers
   render() {
+    this.ctx.font = "bold 28px 'Lucida Grande', Helvetica, Arial, sans-serif";
+
     // A function to help rendering the board
     const drawTriangle = (point, dirx, diry) => {
       this.ctx.beginPath();
@@ -135,29 +139,38 @@ export default
       this.drawMarker(vertical, point, this.markers[key], false);
     }
 
-    if (this.side == BLACK) {
-      this.drawRemovedRings(
-        this.ctx.canvas.width - (this.ringSize * 2 + this.ringPadding) * 3,
-        this.ctx.canvas.height - (this.ringSize * 2 + this.ringPadding),
-        BLACK
-      );
-      this.drawRemovedRings(
-        this.ringPadding + this.ringSize + this.ringWidth / 2,
-        this.ringPadding + this.ringSize + this.ringWidth / 2,
-        WHITE
-      );
-    } else {
-      this.drawRemovedRings(
-        this.ringPadding + this.ringSize + this.ringWidth / 2,
-        this.ringPadding + this.ringSize + this.ringWidth / 2,
-        BLACK
-      );
-      this.drawRemovedRings(
-        this.ctx.canvas.width - (this.ringSize * 2 + this.ringPadding) * 3,
-        this.ctx.canvas.height - (this.ringSize * 2 + this.ringPadding),
-        WHITE
-      );
+    this.drawRemovedRings(
+      this.ctx.canvas.width - (this.ringSize * 2 + this.ringPadding) * 3 + this.ringWidth,
+      this.ctx.canvas.height - (this.ringSize + this.ringPadding + this.ringWidth / 2),
+      this.side == BLACK ? BLACK : WHITE
+    );
+    this.drawRemovedRings(
+      this.ringPadding + this.ringSize + this.ringWidth / 2,
+      this.ringPadding + this.ringSize + this.ringWidth / 2,
+      this.side == BLACK ? WHITE : BLACK
+    );
+
+    this.drawName(this.ringPadding, (this.ringPadding + this.ringSize) * 2 + this.ringWidth, this.name1, "top");
+    this.drawName(
+      this.ctx.canvas.width - this.ctx.measureText(this.name2).width - this.ringPadding,
+      this.ctx.canvas.height - ((this.ringPadding + this.ringSize) * 2 + this.ringWidth),
+      this.name2,
+      "bottom"
+    );
+  }
+
+  drawName(x, y, name, position) {
+    const fillStyle = this.ctx.fillStyle;
+    const textBaseline = this.ctx.textBaseline;
+
+    {
+      this.ctx.textBaseline = position;
+      this.ctx.fillStyle = "#999";
+      this.ctx.fillText(name, x, y);
     }
+
+    this.ctx.fillStyle = fillStyle;
+    this.ctx.textBaseline = textBaseline;
   }
 
   getRingsRemoved(side) {

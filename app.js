@@ -17,7 +17,7 @@ const PORT = process.argv[2] || 3000;
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
-app.use(logger("dev"));
+// app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
@@ -102,6 +102,16 @@ function getPlayer(id) {
   return null;
 }
 
+// Deletes a player by a session id
+function deletePlayer(id) {
+  for (let i = 0; i < players.length; i++) {
+    if (players[i].id == id) {
+      players.splice(i, 1);
+      break;
+    }
+  }
+}
+
 // Create a new game for the given client
 function createGame(ws, message) {
   const game = new Game(generateId(), generateId(), message.game, deleteGame);
@@ -142,7 +152,6 @@ function joinGame(ws, message) {
   }
 
   let role = "waiting";
-  if (game.isFull()) role = "spectating";
 
   let player = getPlayer(message.id);
   if (player == null) {
@@ -152,14 +161,34 @@ function joinGame(ws, message) {
       name: "Guest",
       connected: true
     };
-    players.push(player);
   } else {
-    player.ws = ws;
-    player.connected = true;
+    const name = player.name;
+
+    deletePlayer(player.id);
+    player = {
+      ws,
+      id: message.id,
+      name: name,
+      connected: true
+    };
   }
+
+  players.push(player);
+
+  if (game.isFull()) {
+    return {
+      role: "spectating",
+      name1: game.yinsh.players[0].name,
+      name2: game.yinsh.players[1].name,
+    };
+  }
+
   game.addPlayer(player);
 
-  if (game.isFull()) role = "playing";
+  if (game.isFull()) {
+    game.player1.ws.send(JSON.stringify({ key: "join", data: { role: "playing" } }));
+    game.player2.ws.send(JSON.stringify({ key: "join", data: { role: "playing" } }));
+  }
 
   return { role };
 }
