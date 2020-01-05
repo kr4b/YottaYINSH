@@ -102,27 +102,11 @@ class Game {
     const message = {
       key: "boardUpdate",
       data: {
-        board: this.yinsh.getBoardJSON(),
-        log
+        turnCounter: this.yinsh.turnCounter,
+        log,
       }
     };
     this.messagePlayers(message);
-  }
-
-  // Gets the color of a given side
-  getColor(side) {
-    return side == BLACK ? "BLACK" : "WHITE";
-  }
-
-  // Gets the string coordinate of a position { vertical, point }
-  getCoord(position) {
-    return `${INTERSECTIONS[position.vertical] - position.point + POINT_OFFSET[position.vertical]}${String.fromCharCode("a".charCodeAt(0) + position.vertical)}`;
-  }
-
-  // Gets the log prompt of a given side
-  // 'COLOR-TURN:'
-  getLogPrompt(side) {
-    return `${this.getColor(side)}-${this.yinsh.turnCounter + 1}:`;
   }
 
   // Handles a players move
@@ -144,7 +128,7 @@ class Game {
     if (this.yinsh.turnCounter < 10 && from != undefined) {
       valid = this.yinsh.board.placeRing(from.vertical, from.point, side);
       if (valid) {
-        this.updateBoard(`${this.getLogPrompt(side)} ${this.getCoord(from)}`);
+        this.updateBoard({ ring: from });
       }
     }
     // Turn counter is greater than or equal to 10, so the move is a ring placement
@@ -152,9 +136,10 @@ class Game {
       valid = this.yinsh.validateMove(from, to);
 
       if (valid) {
-        this.yinsh.board.moveRing(from, to);
+        const flipped = {};
+        this.yinsh.board.moveRing(from, to, flipped);
         foundRow = this.checkFiveInRow();
-        this.updateBoard(`${this.getLogPrompt(side)} ${this.getCoord(from)}-${this.getCoord(to)}`);
+        this.updateBoard({ from, to, flipped });
       }
     }
 
@@ -199,7 +184,7 @@ class Game {
       }
 
       this.yinsh.board.setRingsRemoved(side, this.yinsh.board.getRingsRemoved(side) + 1);
-      this.updateBoard(`${this.getLogPrompt(side)} x${this.getCoord(data.ring)}`);
+      this.updateBoard({ remove: { ring: data.ring, row: data.row } });
 
       if (this.yinsh.board.getRingsRemoved(side) == 3) {
         this.terminateGame(side);

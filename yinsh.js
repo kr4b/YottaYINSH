@@ -50,6 +50,7 @@ class Yinsh {
     );
   }
 
+  // Gets the current side whoms turn it is
   getSide() {
     if (this.turnCounter < 10) {
       return this.turnCounter % 2 == 0 ? WHITE : BLACK;
@@ -69,7 +70,7 @@ class Yinsh {
       }
     }
 
-    player.ws.send(JSON.stringify({ key: "turn", data: { turnNumber: this.turnCounter, rings } }));
+    player.ws.send(JSON.stringify({ key: "turn", data: { turnCounter: this.turnCounter, rings } }));
   }
 
   // Checks if a move is valid

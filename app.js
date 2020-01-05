@@ -179,15 +179,18 @@ function joinGame(ws, message) {
 
   players.push(player);
 
-  if (game.isFull()) {
+  const full = game.isFull();
+  game.addPlayer(player);
+
+  if (full) {
     return {
       role: "spectating",
+      board: game.yinsh.getBoardJSON(),
       name1: game.yinsh.players[0].name,
       name2: game.yinsh.players[1].name,
     };
   }
 
-  game.addPlayer(player);
 
   if (game.isFull()) {
     game.player1.ws.send(JSON.stringify({ key: "join", data: { role: "playing" } }));

@@ -25,12 +25,12 @@ class ServerBoard {
   }
 
   // Moves a ring, leaving a marker and flipping the ones it jumped over
-  moveRing(from, to) {
+  moveRing(from, to, flipped) {
     const from_index = this.getIndex(from.vertical, from.point);
     const to_index = this.getIndex(to.vertical, to.point);
     if (from_index < 0 || to_index < 0 || this.rings[from_index] == undefined) return false;
 
-    const flipped = {};
+    flipped = {};
     const paths = this.getPossiblePaths(from.vertical, from.point, flipped);
     if (!paths.includes(to_index)) return false;
 
@@ -39,6 +39,8 @@ class ServerBoard {
         this.markers[key] = (this.markers[key] + 1) % 2;
       }
     }
+
+    flipped = flipped[to_index];
 
     this.markers[from_index] = this.rings[from_index];
     this.rings[to_index] = this.rings[from_index];
@@ -59,11 +61,13 @@ class ServerBoard {
     return true;
   }
 
+  // Gets the index on the board from a vertical and a point
   getIndex(vertical, point) {
     if (vertical == undefined || point == undefined || point < 0 || point >= INTERSECTIONS[vertical]) return -1;
     return vertical * 11 + point;
   }
 
+  // Gets the vertical and point from an index on the board
   getPosition(index) {
     if (index == undefined || index < 0) return null;
     return {
