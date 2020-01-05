@@ -28,18 +28,17 @@ class Game {
       this.spectators.push(player);
       player.ws.send(JSON.stringify({
         key: "boardUpdate",
-        data: { board: this.yinsh.getBoardJSON(), log: "" }}));
+        data: { board: this.yinsh.getBoardJSON(), log: "" }
+      }));
       return;
     } else if (this.player1 == null) {
       this.player1 = player;
+      this.player1.ws.on("close", () => { this.terminateGame(WHITE) });
       if (this.type == "ai") {
         this.player2 = {
           ai: true,
           name: "&#x1F4BB; (AI)",
-          ws: {
-            send: () => { },
-            on: () => { }
-          }
+          ws: { send: () => { }, on: () => { } }
         };
       } else {
         return;
@@ -91,8 +90,8 @@ class Game {
   // Sends a message (Object) to all players and spectators together
   messagePlayers(message) {
     message = JSON.stringify(message);
-    this.player1.ws.send(message);
-    this.player2.ws.send(message);
+    if (this.player1) this.player1.ws.send(message);
+    if (this.player2) this.player2.ws.send(message);
     for (let i = 0; i < this.spectators.length; i++) {
       this.spectators[i].ws.send(message);
     }
