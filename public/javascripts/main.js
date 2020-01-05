@@ -1,6 +1,6 @@
 import Socket from "./socket.js";
 import ClientBoard from "./client_board.js";
-import { SOCKET_URL, ROLES, TURN_TYPE } from "./client_constants.js";
+import { WHITE, SOCKET_URL, TURN_TYPE } from "./client_constants.js";
 
 onload = () => {
   // Constant values
@@ -20,17 +20,27 @@ onload = () => {
 
   // Variables to keep track of the game
   let side = null;
-  let role = ROLES["waiting"];
   let turnType = TURN_TYPE["none"];
 
   socket.setReceive("join", data => {
-    role = ROLES[data.role];
-    console.log(role);
+    if (data.role == "spectating") {
+      document.querySelector("#spectating").style.display = "block";
+      board.name1 = data.name1;
+      board.name2 = data.name2;
+    } else if (data.role == "waiting") {
+      return;
+    }
+
+    document.querySelector("#overlay").classList.remove("overlay");
+    document.querySelector("#waiting").parentElement.style.display = "none";
+    board.resize();
   });
 
   socket.setReceive("side", data => {
     side = data.side;
     board.side = side;
+    board.name1 = data.name1;
+    board.name2 = data.name2 + " (YOU)";
   });
 
   socket.setReceive("row", data => {

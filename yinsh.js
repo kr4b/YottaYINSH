@@ -23,8 +23,31 @@ class Yinsh {
       this.players.push(p1);
     }
 
-    this.players[0].ws.send(JSON.stringify({ key: "side", data: { side: WHITE } }));
-    this.players[1].ws.send(JSON.stringify({ key: "side", data: { side: BLACK } }));
+    this.players[0].ws.send(
+      JSON.stringify(
+        {
+          key: "side",
+          data: {
+            side: WHITE,
+            name1: this.players[1].name,
+            name2: this.players[0].name,
+          }
+        }
+      )
+    );
+
+    this.players[1].ws.send(
+      JSON.stringify(
+        {
+          key: "side",
+          data: {
+            side: BLACK,
+            name1: this.players[0].name,
+            name2: this.players[1].name,
+          }
+        }
+      )
+    );
   }
 
   getSide() {
