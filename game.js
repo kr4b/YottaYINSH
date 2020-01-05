@@ -43,6 +43,11 @@ class Game {
         return;
       }
     } else {
+      // If the player connecting is the same as player1, do nothing
+      if (this.player1.id == player.id) {
+        return;
+      }
+
       this.player2 = player;
     }
 
