@@ -26,7 +26,9 @@ class Game {
   addPlayer(player) {
     if (this.isFull()) {
       this.spectators.push(player);
-      player.ws.send(JSON.stringify({ key: "boardUpdate", data: this.yinsh.getBoardJSON() }));
+      player.ws.send(JSON.stringify({
+        key: "boardUpdate",
+        data: { board: this.yinsh.getBoardJSON(), log: "" }}));
       return;
     } else if (this.player1 == null) {
       this.player1 = player;
