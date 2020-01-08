@@ -136,7 +136,7 @@ class Game {
       valid = this.yinsh.validateMove(from, to);
 
       if (valid) {
-        const flipped = {};
+        const flipped = [];
         this.yinsh.board.moveRing(from, to, flipped);
         foundRow = this.checkFiveInRow();
         this.updateBoard({ from, to, flipped });

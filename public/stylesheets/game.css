@@ -42,7 +42,7 @@
   height: 6.6vh;
   border-radius: 50%;
   border: 1.1vh solid white;
-  animation: loader 2s cubic-bezier(0, 0.2, 0.7, 0.9) infinite;
+  animation: loader 2s cubic-bezier(0, 0.2, 0.6, 0.8) infinite;
 }
 
 @keyframes loader {
