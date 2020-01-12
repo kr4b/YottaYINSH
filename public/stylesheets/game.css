@@ -3,6 +3,57 @@
   height: 100%;
 }
 
+.overlay {
+  top: 0;
+  left: 0;
+  position: absolute;
+  filter: blur(5px);
+  overflow: hidden;
+}
+
+#log {
+  padding: inherit;
+  position: absolute;
+  height: 50%;
+  width: 20%;
+  top: 0;
+  right: 0;
+}
+
+#log > div {
+  position: relative;
+  background-color: #95a5a6;
+  border: 2px solid #34495e;
+  width: 100%;
+  height: 100%;
+}
+
+#log > div::before {
+  --second-border: 5px;
+  content: "";
+  position: absolute;
+  top: calc(-1 * (var(--second-border) + 2px));
+  right: calc(-1 * (var(--second-border) + 2px));
+  bottom: calc(-1 * (var(--second-border) + 2px));
+  left: calc(-1 * (var(--second-border) + 2px));
+  border: var(--second-border) solid #95a5a6;
+}
+
+#log-container {
+  padding: 10px;
+  overflow-wrap: break-word;
+  width: calc(100% - 20px);
+  height: calc(100% - 20px);
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+#log p {
+  padding: 0;
+  padding-bottom: 5px;
+  margin: 0;
+}
+
 #spectating {
   position: absolute;
   display: none;
@@ -10,14 +61,6 @@
   margin-top: -35px;
   left: 50%;
   transform: translate(-50%, 0);
-}
-
-.overlay {
-  top: 0;
-  left: 0;
-  position: absolute;
-  filter: blur(5px);
-  overflow: hidden;
 }
 
 #waiting {

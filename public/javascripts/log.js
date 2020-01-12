@@ -62,12 +62,8 @@ export default
       return;
     }
 
-    const fullLog = {
-      data: log,
-      text: `${side == WHITE ? "White" : "Black"}:${turnCounter + 1}.${logText}`
-    };
-    this.log.push(fullLog);
-    console.log(fullLog.text);
+    this.log.push(log);
+    return `${turnCounter + 1}-${side == WHITE ? "White" : "Black"}.${logText}`;
   }
 
   // Gets the current side whoms turn it is

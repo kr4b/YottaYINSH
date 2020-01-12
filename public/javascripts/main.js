@@ -71,7 +71,9 @@ onload = () => {
   });
 
   socket.setReceive("boardUpdate", data => {
-    log.addLog(data.turnCounter, data.log);
+    const logContainer = document.querySelector("#log-container");
+    const logText = log.addLog(data.turnCounter, data.log);
+    logContainer.innerHTML += `<div>${logText}</div>`;
     update();
   });
 
