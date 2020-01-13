@@ -1,4 +1,4 @@
-import { WHITE, BLACK, WIN_RINGS, INTERSECTIONS } from "./client_constants.js";
+import { WHITE, BLACK, WIN_RINGS, INTERSECTIONS, LETTER_INDEX, NUMBER_INDEX } from "./client_constants.js";
 
 // Board class for the client side
 export default
@@ -83,8 +83,6 @@ export default
 
   // Renders the board, rings and markers
   render() {
-    this.ctx.font = "bold 28px 'Lucida Grande', Helvetica, Arial, sans-serif";
-
     // A function to help rendering the board
     const drawTriangle = (point, dirx, diry) => {
       this.ctx.beginPath();
@@ -123,6 +121,27 @@ export default
       }
     }
 
+    this.ctx.save();
+    this.ctx.font = "bold 14px 'Lucida Grande', Helvetica, Arial, sans-serif";
+    this.ctx.textBaseline = "middle";
+    this.ctx.textAlign = "center";
+    this.ctx.fillStyle = "#666";
+
+    const padding = 20;
+
+    let letter = 97;
+    for (let index of LETTER_INDEX) {
+      const { x, y } = this.getCanvasCoordinate((index / 11) | 0, index % 11);
+      this.ctx.fillText(String.fromCodePoint(letter++), x, y + padding)
+    }
+
+    let number = 1;
+    for (let index of NUMBER_INDEX) {
+      const { x, y } = this.getCanvasCoordinate((index / 11) | 0, index % 11);
+      this.ctx.fillText(number++, x - padding / 2 * Math.sqrt(3), y - padding / 2)
+    }
+    this.ctx.restore();
+
     // Render the rings
     for (let key in this.rings) {
       const vertical = (key / 11) | 0;
@@ -150,6 +169,7 @@ export default
       this.side == BLACK ? WHITE : BLACK
     );
 
+    this.ctx.font = "bold 28px 'Lucida Grande', Helvetica, Arial, sans-serif";
     this.drawName(this.ringPadding, (this.ringPadding + this.ringSize) * 2 + this.ringWidth, this.name1, "top");
     this.drawName(
       this.ctx.canvas.width - this.ctx.measureText(this.name2).width - this.ringPadding,
