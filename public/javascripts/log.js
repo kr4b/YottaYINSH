@@ -40,7 +40,7 @@ export default
       logText = this.getCoord(log.from) + "-" + this.getCoord(log.to);
     }
     // Ring and marker removal
-    else if (log.remove && log.remove.ring && log.remove.row) {
+    else if (log.remove && log.remove.ring && log.remove.row && log.side) {
       const ring = this.getIndex(log.remove.ring.vertical, log.remove.ring.point);
       delete this.board.rings[ring];
 
@@ -53,6 +53,8 @@ export default
 
         delete this.board.markers[index];
       }
+
+      this.board.ringsRemoved[log.side]++;
 
       logText =
         "x" + this.getCoord(this.getPosition(first)) +
