@@ -184,7 +184,7 @@ class Game {
       }
 
       this.yinsh.board.setRingsRemoved(side, this.yinsh.board.getRingsRemoved(side) + 1);
-      this.updateBoard({ remove: { ring: data.ring, row: data.row } });
+      this.updateBoard({ side: side == WHITE ? 0 : 1, remove: { ring: data.ring, row: data.row } });
 
       if (this.yinsh.board.getRingsRemoved(side) == 3) {
         this.terminateGame(side);
