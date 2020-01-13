@@ -78,10 +78,24 @@ onload = () => {
   });
 
   socket.setReceive("terminate", data => {
-    console.log(data.winner);
-    setTimeout(() => {
-      window.location.assign("/");
-    }, 10000);
+    let winner;
+
+    if (side == null) {
+      if (data.winner == WHITE) winner = board.name1;
+      else winner = board.name2;
+    } else if (side == data.winner) {
+      winner = board.name2;
+    } else {
+      winner = board.name1;
+    }
+
+    const endscreen = document.querySelector("#endscreen");
+    endscreen.innerHTML = `${winner}<div>won the game</div>`;
+    endscreen.classList.add("visible");
+
+    // setTimeout(() => {
+    //   window.location.assign("/");
+    // }, 10000);
   });
 
   socket.setReceive("session", data => {

@@ -179,10 +179,10 @@ function joinGame(ws, message) {
 
   players.push(player);
 
-  const full = game.isFull();
+  const isFull = game.isFull();
   game.addPlayer(player);
 
-  if (full) {
+  if (isFull) {
     return {
       role: "spectating",
       board: game.yinsh.getBoardJSON(),
