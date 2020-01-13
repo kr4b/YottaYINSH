@@ -7,12 +7,12 @@ constants["loadConstants"] = () => {
 
   return JSON.parse(`{${
     data
-      .replace(/\r\n(\r\n)+/g, "\r\n")
-      .replace(/;\r\n.+$/, "")
+      .replace(/\r?\n(\r?\n)+/g, "\r\n")
+      .replace(/;\r?\n.+$/, "")
       .replace(/const\s+(.+)\s*=/g, "\"$1\":")
       .replace(/\s+"/g, "\"")
       .replace(/;/g, ",")
-  }}`);
+    }}`);
 };
 
 module.exports = constants;
