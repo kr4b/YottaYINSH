@@ -179,7 +179,10 @@ function joinGame(ws, message) {
 
   players.push(player);
 
-  if (game.isFull()) {
+  const isFull = game.isFull();
+  game.addPlayer(player);
+
+  if (isFull) {
     return {
       role: "spectating",
       name1: game.yinsh.players[0].name,
@@ -187,7 +190,6 @@ function joinGame(ws, message) {
     };
   }
 
-  game.addPlayer(player);
 
   if (game.isFull()) {
     game.player1.ws.send(JSON.stringify({ key: "join", data: { role: "playing" } }));
