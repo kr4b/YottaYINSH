@@ -6,6 +6,15 @@ onload = () => {
   const socket = new Socket(new WebSocket(SOCKET_URL));
   let games = [];
 
+  { // Add scrollbar width padding to some elements
+    const gameListHeader = document.getElementById("game-list-header");
+    const gameList = document.getElementById("game-list");
+    const scrollbarWidth = gameList.getBoundingClientRect().width - gameList.clientWidth;
+    gameListHeader.style.paddingRight = `${scrollbarWidth}px`;
+    gameListHeader.style.paddingLeft = `${scrollbarWidth}px`;
+    gameList.style.paddingLeft = `${scrollbarWidth}px`;
+  }
+
   // Add a game item to the list
   const addGameItem = async (gameId, availability, player1, player2, elapsedTime) => {
     const time = Math.floor(elapsedTime / 3600).toString().padStart(2, "0")
@@ -15,7 +24,7 @@ onload = () => {
     const item = document.createElement("div");
 
     item.onclick = () => socket.send("public", { id: gameId });
-    item.className = "item";
+    item.className = "game-item";
     item.innerHTML = `
       <div class="visibility" alt="join" title="${availability}">${ICONS[AVAILABILITY[availability]]}</div>
       <div class="player">${clean(player1 || "-")}</div>
@@ -23,17 +32,15 @@ onload = () => {
       <div class="player-count">${(player1 ? 1 : 0) + (player2 ? 1 : 0)}/2</div>
       <div class="time">${time}</div>
     `;
-    document.querySelector("#list").appendChild(item);
+    document.getElementById("game-list").appendChild(item);
   };
 
   // Clean player name to prevent HTML injection
   const clean = str => str.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
   const refreshGameItems = async () => {
-    const list = document.querySelector("#list");
-    const buttons = list.children[0];
+    const list = document.getElementById("game-list");
     list.innerHTML = "";
-    list.appendChild(buttons);
 
     const localgames = Array.from(games).sort((a, b) => sortingMethod[selectedSort](a, b) * (ascendingSort ? 1 : -1));
 
@@ -51,7 +58,7 @@ onload = () => {
     }, 1000);
   };
 
-  document.querySelector("#name > input").oninput = e => {
+  document.getElementById("name-input").oninput = e => {
     socket.send("name", { id: sessionStorage.getItem("id"), name: e.srcElement.value });
   };
 
@@ -76,11 +83,11 @@ onload = () => {
     socket.send("create", { game });
   };
 
-  document.querySelector("#public").onclick = () => createGame("public");
-  document.querySelector("#private").onclick = () => createGame("private");
-  document.querySelector("#ai").onclick = () => createGame("ai");
+  document.getElementById("public-game").onclick = () => createGame("public");
+  document.getElementById("private-game").onclick = () => createGame("private");
+  // document.getElementById("ai-game").onclick = () => createGame("ai");
 
-  document.querySelectorAll("#list-header > .item > div").forEach((value, key) => {
+  document.querySelectorAll("#game-list-header > h1").forEach((value, key) => {
     value.onclick = () => {
       if (selectedSort == key)
         ascendingSort = !ascendingSort;
