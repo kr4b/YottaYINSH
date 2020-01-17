@@ -1,5 +1,5 @@
 import { WHITE, BLACK, INTERSECTIONS, POINT_OFFSET } from "./client_constants.js";
-
+import { RingPlaceAnimation, RingMoveAnimation, RingRemoveAnimation } from "./animation.js";
 
 export default
   class Log {
@@ -16,33 +16,25 @@ export default
     const side = this.getSide();
 
     let logText = "";
+    let animation = null;
 
     // Ring placement
     if (log.ring) {
-      this.board.rings[this.getIndex(log.ring.vertical, log.ring.point)] = side;
+      animation = new RingPlaceAnimation(this.board, log.ring.vertical, log.ring.point, side);
 
       logText = this.getCoord(log.ring);
     }
     // Ring movement and marker flipping
     else if (log.from && log.to && log.flipped) {
-      const fromIndex = this.getIndex(log.from.vertical, log.from.point);
-
-      delete this.board.rings[fromIndex];
-      this.board.rings[this.getIndex(log.to.vertical, log.to.point)] = side;
-
-      for (let key in log.flipped) {
-        const index = log.flipped[key];
-        this.board.markers[index] = (this.board.markers[index] + 1) % 2;
-      }
-
-      this.board.markers[fromIndex] = side;
+      delete this.board.rings[this.getIndex(log.from.vertical, log.from.point)];
+      animation = new RingMoveAnimation(this.board, log.from, log.to, log.flipped, side)
 
       logText = this.getCoord(log.from) + "-" + this.getCoord(log.to);
     }
     // Ring and marker removal
-    else if (log.remove && log.remove.ring && log.remove.row && log.side) {
-      const ring = this.getIndex(log.remove.ring.vertical, log.remove.ring.point);
-      delete this.board.rings[ring];
+    else if (log.remove && log.remove.ring && log.remove.row && log.side != undefined) {
+      delete this.board.rings[this.getIndex(log.remove.ring.vertical, log.remove.ring.point)];
+      animation = new RingRemoveAnimation(this.board, log.remove.ring, log.remove.row, log.side);
 
       let first = null;
       let last = null;
@@ -54,8 +46,6 @@ export default
         delete this.board.markers[index];
       }
 
-      this.board.ringsRemoved[log.side]++;
-
       logText =
         "x" + this.getCoord(this.getPosition(first)) +
         "-" + this.getCoord(this.getPosition(last)) +
@@ -65,7 +55,10 @@ export default
     }
 
     this.log.push(log);
-    return `${turnCounter + 1}-${side == WHITE ? "White" : "Black"}.${logText}`;
+    return {
+      text: `${turnCounter + 1}-${side == WHITE ? "White" : "Black"}.${logText}`,
+      animation: animation
+    };
   }
 
   // Gets the current side whoms turn it is
