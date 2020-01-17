@@ -1,4 +1,4 @@
-import { WHITE, BLACK, WIN_RINGS, INTERSECTIONS } from "./client_constants.js";
+import { WHITE, BLACK, WHITE_COLOR, BLACK_COLOR, WHITE_HINT_COLOR, BLACK_HINT_COLOR, WIN_RINGS, INTERSECTIONS } from "./client_constants.js";
 
 // Board class for the client side
 export default
@@ -84,6 +84,8 @@ export default
   // Renders the board, rings and markers
   render() {
     this.ctx.font = "bold 28px 'Lucida Grande', Helvetica, Arial, sans-serif";
+    this.ctx.strokeStyle = "#000";
+    this.ctx.lineWidth = 2;
 
     // A function to help rendering the board
     const drawTriangle = (point, dirx, diry) => {
@@ -177,6 +179,10 @@ export default
     return this.ringsRemoved[side == WHITE ? 0 : 1];
   }
 
+  setStroke(side) {
+    this.ctx.strokeStyle = side == BLACK ? WHITE_COLOR : BLACK_COLOR;
+  }
+
   // Renders the collected rings
   drawRemovedRings(x, y, side) {
     const lineWidth = this.ctx.lineWidth;
@@ -188,9 +194,9 @@ export default
     for (let i = 0; i < WIN_RINGS; i++) {
       if (i >= this.getRingsRemoved(side)) {
         this.ctx.globalAlpha = .5;
-        this.ctx.strokeStyle = side == BLACK ? "#111" : "#999";
+        this.ctx.strokeStyle = side == BLACK ? WHITE_HINT_COLOR : BLACK_HINT_COLOR;
       } else {
-        this.ctx.strokeStyle = side == BLACK ? "#111" : "#ddd";
+        this.setStroke(side);
       }
 
       this.drawSingleRing(
@@ -216,7 +222,7 @@ export default
 
       if (outline) this.ctx.globalAlpha = .5;
 
-      this.ctx.strokeStyle = side == BLACK ? "#111" : "#ddd";
+      this.setStroke(side);
       this.drawSingleRing(coord.x, coord.y);
     }
 
@@ -226,9 +232,9 @@ export default
   }
 
   // Renders a single ring
-  drawSingleRing(x, y) {
+  drawSingleRing(x, y, size = null) {
     this.ctx.beginPath();
-    this.ctx.arc(x, y, this.ringSize, 0, Math.PI * 2);
+    this.ctx.arc(x, y, size || this.ringSize, 0, Math.PI * 2);
     this.ctx.stroke();
   }
 
@@ -238,18 +244,22 @@ export default
     const globalAlpha = this.ctx.globalAlpha;
 
     {
-      const coord = this.getCanvasCoordinate(vertical, point);
-
       if (outline) this.ctx.globalAlpha = .5;
 
-      this.ctx.fillStyle = side == BLACK ? "#111" : "#ddd";
-      this.ctx.beginPath();
-      this.ctx.arc(coord.x, coord.y, this.ringSize, 0, Math.PI * 2);
-      this.ctx.fill();
+      this.ctx.fillStyle = side == BLACK ? WHITE_COLOR : BLACK_COLOR;
+      this.drawSingleMarker(vertical, point);
     }
 
     this.ctx.fillStyle = fillStyle;
     this.ctx.globalAlpha = globalAlpha;
+  }
+
+  // Renders a single marker
+  drawSingleMarker(vertical, point) {
+    const coord = this.getCanvasCoordinate(vertical, point);
+    this.ctx.beginPath();
+    this.ctx.arc(coord.x, coord.y, this.ringSize, 0, Math.PI * 2);
+    this.ctx.fill();
   }
 
   // Renders a highlight at all indexes in the row

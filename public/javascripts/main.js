@@ -14,12 +14,11 @@ onload = () => {
 
   // Variables to help with board interaction
   const mouse = { x: 0, y: 0 };
-  let animationFrame = null;
   let pathsPerRing = null;
   let possibleRows = [];
   let targetRing = null;
   let rowToRemove = null;
-  let turnNumber = 0;
+  let animations = [];
 
   // Variables to keep track of the game
   let side = null;
@@ -40,6 +39,7 @@ onload = () => {
     document.querySelector("#overlay").classList.remove("overlay");
     document.querySelector("#waiting").parentElement.style.display = "none";
     board.resize();
+    update();
   });
 
   socket.setReceive("side", data => {
@@ -59,22 +59,23 @@ onload = () => {
   socket.setReceive("turn", data => {
     if (data.turnCounter < 10) {
       turnType = TURN_TYPE["ring"];
-      cancelAnimationFrame(animationFrame);
-      animationFrame = requestAnimationFrame(update);
     } else {
       turnType = TURN_TYPE["marker"];
       targetRing = null;
       pathsPerRing = data.rings;
-      cancelAnimationFrame(animationFrame);
-      animationFrame = requestAnimationFrame(update);
     }
   });
 
   socket.setReceive("boardUpdate", data => {
     const logContainer = document.querySelector("#log-container");
-    const logText = log.addLog(data.turnCounter, data.log);
-    logContainer.innerHTML += `<div>${logText}</div>`;
-    update();
+    const logResult = log.addLog(data.turnCounter, data.log);
+    if (logResult.text) {
+      logContainer.innerHTML += `<div>${logResult.text}</div>`;
+    }
+
+    if (logResult.animation) {
+      animations.push(logResult.animation);
+    }
   });
 
   socket.setReceive("terminate", data => {
@@ -140,7 +141,6 @@ onload = () => {
         board.validateRing(mouse.x, mouse.y, (vertical, point) => {
           socket.send("turn", { id, game: gameId, from: { vertical, point } });
           turnType = TURN_TYPE["none"];
-          cancelAnimationFrame(animationFrame);
         });
       }
 
@@ -159,7 +159,6 @@ onload = () => {
                 to: { vertical, point }
               });
               turnType = TURN_TYPE["none"];
-              cancelAnimationFrame(animationFrame);
             }
           });
         }
@@ -195,7 +194,6 @@ onload = () => {
             }
           });
           turnType = TURN_TYPE["none"];
-          cancelAnimationFrame(animationFrame);
         }
       }
     }
@@ -225,6 +223,15 @@ onload = () => {
       if (targetRing != null) board.drawMarker(targetRing.vertical, targetRing.point, side, true);
     }
 
-    animationFrame = requestAnimationFrame(update);
+    for (let i = animations.length - 1; i >= 0; i--) {
+      const animation = animations[i];
+      if (animation.done) {
+        animations.splice(i, 1);
+      } else {
+        animation.update();
+      }
+    }
+
+    requestAnimationFrame(update);
   }
 };
