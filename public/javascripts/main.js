@@ -220,7 +220,13 @@ onload = () => {
     else if (turnType == TURN_TYPE["marker"]) {
       board.validateMarker(mouse.x, mouse.y, side, (vertical, point) => board.drawMarker(vertical, point, side, true));
 
-      if (targetRing != null) board.drawMarker(targetRing.vertical, targetRing.point, side, true);
+      if (targetRing != null) {
+        board.drawMarker(targetRing.vertical, targetRing.point, side, true);
+
+        let paths = board.getPossiblePaths(targetRing.vertical, targetRing.point, {});
+        paths.splice(paths.indexOf(targetRing.vertical * 11 + targetRing.point), 1);
+        board.highlightRow(paths, true, 0.6);
+      }
     }
 
     for (let i = animations.length - 1; i >= 0; i--) {

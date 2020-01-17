@@ -131,20 +131,22 @@ export default
     this.ctx.textAlign = "center";
     this.ctx.fillStyle = "#666";
 
-    const padding = 20;
-
-    let letter = 97;
-    for (let index of LETTER_INDEX) {
-      const { x, y } = this.getCanvasCoordinate((index / 11) | 0, index % 11);
-      this.ctx.fillText(String.fromCodePoint(letter++), x, y + padding)
+    { // Draw the vertical and point indications
+      const padding = 20;
+  
+      let letter = 97;
+      for (let index of LETTER_INDEX) {
+        const { x, y } = this.getCanvasCoordinate((index / 11) | 0, index % 11);
+        this.ctx.fillText(String.fromCodePoint(letter++), x, y + padding)
+      }
+  
+      let number = 1;
+      for (let index of NUMBER_INDEX) {
+        const { x, y } = this.getCanvasCoordinate((index / 11) | 0, index % 11);
+        this.ctx.fillText(number++, x - padding / 2 * Math.sqrt(3), y - padding / 2)
+      }
+      this.ctx.restore();
     }
-
-    let number = 1;
-    for (let index of NUMBER_INDEX) {
-      const { x, y } = this.getCanvasCoordinate((index / 11) | 0, index % 11);
-      this.ctx.fillText(number++, x - padding / 2 * Math.sqrt(3), y - padding / 2)
-    }
-    this.ctx.restore();
 
     // Render the rings
     for (let key in this.rings) {
@@ -285,7 +287,7 @@ export default
   }
 
   // Renders a highlight at all indexes in the row
-  highlightRow(row, outline) {
+  highlightRow(row, outline, scale = 1) {
     const fillStyle = this.ctx.fillStyle;
     const globalAlpha = this.ctx.globalAlpha;
 
@@ -298,11 +300,56 @@ export default
 
       const { x, y } = this.getCanvasCoordinate(vertical, point);
       this.ctx.beginPath();
-      this.ctx.arc(x, y, this.ringSize * 1.2, 0, Math.PI * 2);
+      this.ctx.arc(x, y, this.ringSize * 1.2 * scale, 0, Math.PI * 2);
       this.ctx.fill();
     }
 
     this.ctx.fillStyle = fillStyle;
     this.ctx.globalAlpha = globalAlpha;
+  }
+
+  getPossiblePaths(vertical, point, flipped, direction = -1, passed_marker = false) {
+    const getIndex = (vertical, point) => {
+      if (vertical == undefined || point == undefined || point < 0 || point >= INTERSECTIONS[vertical]) return -1;
+      return vertical * 11 + point;
+    }
+
+    const index = getIndex(vertical, point);
+    if (index < 0 || isNaN(vertical) || isNaN(point)) return [];
+    if (direction != -1 && this.rings[index] != undefined) return [];
+    if (direction == -1) {
+      flipped[0] = [];
+      flipped[1] = [];
+      flipped[2] = [];
+      flipped[3] = [];
+      flipped[4] = [];
+      flipped[5] = [];
+    }
+    if (passed_marker && this.rings[index] == undefined && this.markers[index] == undefined) {
+      flipped[index] = flipped[direction];
+      delete flipped[direction];
+      return [index];
+    }
+
+    if (this.markers[index] != undefined) passed_marker = true;
+
+    let out = [];
+    if (this.markers[index] == undefined) out.push(index);
+    else if (direction != -1 && this.markers[index] != undefined) flipped[direction].push(index);
+
+    if (direction == -1 || direction == 0)
+      out = out.concat(this.getPossiblePaths(vertical, point - 1, flipped, 0, passed_marker));
+    if (direction == -1 || direction == 1)
+      out = out.concat(this.getPossiblePaths(vertical + 1, point + Math.floor((INTERSECTIONS[vertical + 1] - INTERSECTIONS[vertical]) / 2), flipped, 1, passed_marker));
+    if (direction == -1 || direction == 2)
+      out = out.concat(this.getPossiblePaths(vertical + 1, point + Math.floor((INTERSECTIONS[vertical + 1] - INTERSECTIONS[vertical]) / 2) + 1, flipped, 2, passed_marker));
+    if (direction == -1 || direction == 3)
+      out = out.concat(this.getPossiblePaths(vertical, point + 1, flipped, 3, passed_marker));
+    if (direction == -1 || direction == 4)
+      out = out.concat(this.getPossiblePaths(vertical - 1, point + Math.floor((INTERSECTIONS[vertical - 1] - INTERSECTIONS[vertical]) / 2) + 1, flipped, 4, passed_marker));
+    if (direction == -1 || direction == 5)
+      out = out.concat(this.getPossiblePaths(vertical - 1, point + Math.floor((INTERSECTIONS[vertical - 1] - INTERSECTIONS[vertical]) / 2), flipped, 5, passed_marker));
+
+    return out;
   }
 }
