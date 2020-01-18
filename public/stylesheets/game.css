@@ -6,7 +6,7 @@ main {
 
 #menu {
   grid-template-areas: "menu-header" "log";
-  grid-template-rows: min-content 1fr;
+  grid-template-rows: min-content minmax(0, 1fr);
   grid-template-columns: 1fr;
   row-gap: 1em;
 }
@@ -14,9 +14,67 @@ main {
 #log {
   grid-area: log;
 
+  padding: 1em;
+  box-sizing: border-box;
+
+  width: 100%;
+  height: 100%;
+
+  display: -ms-grid;
+  display: grid;
+  grid-template-areas: "log-header" "log-container";
+  grid-template-rows: min-content minmax(0, 1fr);
+  grid-template-columns: 1fr;
+
+  overflow: hidden;
+}
+
+#log-header {
+  grid-area: log-header;
+  background-color: var(--highlight-color-light);
+  border-radius: 5px 5px 0 0;
+}
+
+#log-header > h1 {
+  box-sizing: border-box;
+  padding: 1.25ch;
+}
+
+#log-container {
+  grid-area: log-container;
+  
+  position: relative;
+  padding: 1ex 0;
+
   width: 100%;
   height: 100%;
   background-color: var(--game-list-bg-color);
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+
+  border-radius: 0 0 5px 5px;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+
+#log-container > .log-entry {
+  color: var(--text-color-light);
+  font-size: 1.2em;
+}
+
+.log-entry:last-of-type {
+  padding-bottom: 1ex;
+}
+
+#log-header, .log-entry {  
+  display: -ms-grid;
+  display: grid;
+  grid-template-areas: "turn-number side move-data";
+  grid-template-rows: 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
+  column-gap: 1vmin;
 }
 
 #content-container {

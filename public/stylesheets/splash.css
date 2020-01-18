@@ -26,6 +26,12 @@
   grid-area: stats-list;
 }
 
+#content-header {
+  grid-area: content-header;
+
+  background-color: var(--highlight-color-light);
+}
+
 #content-header > h1:hover {
   background-color: var(--highlight-color-dark);
 }

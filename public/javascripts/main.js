@@ -18,6 +18,16 @@ onload = () => {
   const gameId = url.searchParams.get("id");
   let id = sessionStorage.getItem("id");
 
+  
+  { // Add scrollbar width padding to some elements
+    const LogHeader = document.getElementById("log-header");
+    const logContainer = document.getElementById("log-container");
+    const scrollbarWidth = logContainer.getBoundingClientRect().width - logContainer.clientWidth;
+    LogHeader.style.paddingRight = `${scrollbarWidth}px`;
+    LogHeader.style.paddingLeft = `${scrollbarWidth}px`;
+    logContainer.style.paddingLeft = `${scrollbarWidth}px`;
+  }
+
   // Variables to help with board interaction
   const mouse = { x: 0, y: 0 };
   let pathsPerRing = null;
@@ -42,8 +52,8 @@ onload = () => {
       return;
     }
 
-    document.querySelector("#overlay").classList.remove("overlay");
-    document.querySelector("#waiting").parentElement.style.display = "none";
+    // document.querySelector("#overlay").classList.remove("overlay");
+    // document.querySelector("#waiting").parentElement.style.display = "none";
     board.resize();
     update();
   });
@@ -73,10 +83,19 @@ onload = () => {
   });
 
   socket.setReceive("boardUpdate", data => {
-    const logContainer = document.querySelector("#log-container");
+    const logContainer = document.getElementById("log-container");
     const logResult = log.addLog(data.turnCounter, data.log);
     if (logResult.text) {
-      logContainer.innerHTML += `<div>${logResult.text}</div>`;
+      const turnNumber = logResult.text.replace(/^([0-9]+)-.*$/, "$1");
+      const side = logResult.text.replace(/^.*(BLACK|WHITE).*$/i, "$1");
+      const moveData = logResult.text.replace(/^.*\./, "");
+
+      logContainer.innerHTML +=
+        `<div class="log-entry">
+          <div>${turnNumber}</div>
+          <div>${side}</div>
+          <div>${moveData}</div>
+        </div>`;
     }
 
     if (logResult.animation) {
