@@ -21,4 +21,35 @@ const TURN_TYPE = { "ring": 0, "marker": 1, "none": 2, "remove": 3 };
 const AVAILABILITY = { "open": 0, "private": 1, "full": 2 };
 const ICONS = ["&#x1f513;", "&#x1f510;", "&#x1f441;"];
 
-export { WHITE, BLACK, WHITE_COLOR, BLACK_COLOR, WIN_RINGS, WHITE_HINT_COLOR, BLACK_HINT_COLOR, INTERSECTIONS, SOCKET_URL, TURN_TYPE, AVAILABILITY, ICONS, POINT_OFFSET, NUMBER_INDEX, LETTER_INDEX };
+const AUDIO = [
+  {
+    "name": "PLACE",
+    "path": "../audio/place.wav",
+  },
+  {
+    "name": "MOVE",
+    "path": "../audio/move.wav",
+  },
+  {
+    "name": "MARKER",
+    "path": "../audio/marker.wav",
+  },
+  {
+    "name": "RING",
+    "path": "../audio/ring.wav",
+  },
+  {
+    "name": "WIN",
+    "path": "../audio/win.wav",
+  },
+  {
+    "name": "LOSE",
+    "path": "../audio/lose.wav",
+  }
+];
+
+export {
+  WHITE, BLACK, WHITE_COLOR, BLACK_COLOR, WHITE_HINT_COLOR, BLACK_HINT_COLOR,
+  WIN_RINGS, INTERSECTIONS, SOCKET_URL, TURN_TYPE, AVAILABILITY, ICONS,
+  POINT_OFFSET, NUMBER_INDEX, LETTER_INDEX, AUDIO
+};

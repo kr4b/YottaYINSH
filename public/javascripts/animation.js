@@ -46,7 +46,7 @@ class BoardAnimation {
     return Math.min(1, diff / this.DURATION);
   }
 
-  update() {
+  update(audioPlayer) {
     throw new Error("This method should be overwritten by subclass and not be called directly")
   }
 }
@@ -61,7 +61,7 @@ class RingPlaceAnimation extends BoardAnimation {
     this.side = side;
   }
 
-  update() {
+  update(audioPlayer) {
     const frac = super.updateTime();
 
     const coord = this.board.getCanvasCoordinate(this.vertical, this.point);
@@ -75,9 +75,10 @@ class RingPlaceAnimation extends BoardAnimation {
       qlerp(this.board.ringSize * 10, this.board.ringSize, frac)
     );
 
-    this.board.ctx.globalAlpha = 1.0
+    this.board.ctx.globalAlpha = 1.0;
 
     if (this.done) {
+      audioPlayer.playAudio("PLACE");
       this.board.rings[getIndex(this.vertical, this.point)] = this.side;
       return;
     }
@@ -89,16 +90,21 @@ class RingMoveAnimation extends BoardAnimation {
   constructor(board, from, to, flipped, side) {
     super(board);
     // Dynamic duration so the speed of the ring movement is constant
-    this.DURATION = Math.max(Math.abs(from.vertical - to.vertical), Math.abs(from.point - to.point)) / 3 * 800;
+    this.DURATION = 600;
     this.from = from;
     this.to = to;
     this.flipped = flipped;
     this.side = side;
-    delete this.board.rings[getIndex(this.from.vertical, this.from.point)];
+    this.audioPlayed = false;
   }
 
-  update() {
+  update(audioPlayer) {
     const frac = super.updateTime();
+
+    if (!this.audioPlayed && frac > 0.2) {
+      this.audioPlayed = true;
+      audioPlayer.playAudio("MOVE");
+    }
 
     this.board.ctx.fillStyle = this.side == BLACK ? WHITE_COLOR : BLACK_COLOR;
     this.board.drawSingleMarker(this.from.vertical, this.from.point);
@@ -150,10 +156,18 @@ class RingRemoveAnimation extends BoardAnimation {
     this.point = ring.point;
     this.row = row;
     this.side = side;
+    this.markers = Array(5).fill(false);
   }
 
-  update() {
+  update(audioPlayer) {
     const frac = super.updateTime();
+
+    for (let i = 0; i < this.markers.length; i++) {
+      if (!this.markers[i] && frac > (i * 0.2 - 0.01)) {
+        this.markers[i] = true;
+        audioPlayer.playAudio("MARKER");
+      }
+    }
 
     const index = Math.min(4, Math.floor(frac * 5));
 
@@ -194,6 +208,8 @@ class RingRemoveAnimation extends BoardAnimation {
     );
 
     if (this.done) {
+      audioPlayer.playAudio("RING");
+
       this.board.ringsRemoved[this.side]++;
       return;
     }

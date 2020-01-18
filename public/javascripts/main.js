@@ -2,11 +2,13 @@ import Socket from "./socket.js";
 import ClientBoard from "./client_board.js";
 import { WHITE, SOCKET_URL, TURN_TYPE } from "./client_constants.js";
 import Log from "./log.js";
+import AudioPlayer from "./audio.js";
 
 onload = () => {
   // Constant values
   const socket = new Socket(new WebSocket(SOCKET_URL));
   const board = new ClientBoard(document.querySelector("#yinsh-board"));
+  const audioPlayer = new AudioPlayer();
   const log = new Log(board);
   const url = new URL(window.location);
   const gameId = url.searchParams.get("id");
@@ -79,24 +81,28 @@ onload = () => {
   });
 
   socket.setReceive("terminate", data => {
-    let winner;
+    setTimeout(() => {
+      let winner;
 
-    if (side == null) {
-      if (data.winner == WHITE) winner = board.name1;
-      else winner = board.name2;
-    } else if (side == data.winner) {
-      winner = board.name2;
-    } else {
-      winner = board.name1;
-    }
+      if (side == null) {
+        if (data.winner == WHITE) winner = board.name1;
+        else winner = board.name2;
+      } else if (side == data.winner) {
+        setTimeout(() => {
+          audioPlayer.playAudio("WIN");
+        }, 1500);
+        winner = board.name2;
+      } else {
+        setTimeout(() => {
+          audioPlayer.playAudio("LOSE");
+        }, 1500);
+        winner = board.name1;
+      }
 
-    const endscreen = document.querySelector("#endscreen");
-    endscreen.innerHTML = `${winner}<div>won the game</div>`;
-    endscreen.classList.add("visible");
-
-    // setTimeout(() => {
-    //   window.location.assign("/");
-    // }, 10000);
+      const endscreen = document.querySelector("#endscreen");
+      endscreen.innerHTML = `${winner}<div>won the game</div>`;
+      endscreen.classList.add("visible");
+    }, 1500);
   });
 
   socket.setReceive("session", data => {
@@ -234,7 +240,7 @@ onload = () => {
       if (animation.done) {
         animations.splice(i, 1);
       } else {
-        animation.update();
+        animation.update(audioPlayer);
       }
     }
 
