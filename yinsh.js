@@ -1,7 +1,8 @@
-const ServerBoard = require("./server_board.js");
-const { BLACK, WHITE } = require("./server_constants").loadConstants();
+import ServerBoard from "./server_board.js";
+import { BLACK, WHITE } from "./public/javascripts/client_constants.js";
 
-class Yinsh {
+export default
+  class Yinsh {
 
   constructor() {
     this.board = new ServerBoard();
@@ -89,8 +90,6 @@ class Yinsh {
     };
   }
 }
-
-module.exports = Yinsh;
 
 // send turn request to socket
 // get move

@@ -1,7 +1,8 @@
-const Yinsh = require("./yinsh.js");
-const { WHITE, BLACK, INTERSECTIONS, POINT_OFFSET } = require("./server_constants").loadConstants();
+import Yinsh from "./yinsh.js";
+import { WHITE, BLACK, INTERSECTIONS, POINT_OFFSET } from "./public/javascripts/client_constants.js";
 
-class Game {
+export default
+  class Game {
   constructor(publicId, privateId, type, terminateCallback) {
     this.publicId = publicId;
     this.privateId = privateId;
@@ -211,5 +212,3 @@ class Game {
     return false;
   }
 }
-
-module.exports = Game;

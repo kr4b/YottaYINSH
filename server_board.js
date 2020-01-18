@@ -1,6 +1,7 @@
-const { BLACK, WHITE, INTERSECTIONS } = require("./server_constants").loadConstants();
+import { BLACK, WHITE, INTERSECTIONS } from "./public/javascripts/client_constants.js";
 
-class ServerBoard {
+export default
+  class ServerBoard {
 
   constructor() {
     this.rings = {};
@@ -160,5 +161,3 @@ class ServerBoard {
     return out;
   }
 }
-
-module.exports = ServerBoard;
