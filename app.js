@@ -1,13 +1,15 @@
-const express = require("express");
-const path = require("path");
-const cookieParser = require("cookie-parser");
+import express from "express";
+import path from "path";
+import cookieParser from "cookie-parser";
 
-const http = require("http");
-const websocket = require("ws");
+import http from "http";
+import websocket from "ws";
 
-const crypto = require("crypto");
+import crypto from "crypto";
 
-const Game = require("./game");
+import Game from "./game.js";
+
+const __dirname = path.resolve();
 
 const app = express();
 const PORT = process.argv[2] || 3000;
@@ -295,4 +297,4 @@ wss.on("connection", ws => {
 
 server.listen(PORT);
 
-module.exports = app;
+export default app;
