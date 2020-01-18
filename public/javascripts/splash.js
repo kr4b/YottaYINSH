@@ -1,13 +1,18 @@
 import Socket from "./socket.js";
-import { SOCKET_URL, AVAILABILITY, ICONS } from "./client_constants.js";
-
+import { SOCKET_URL, AVAILABILITY, ICONS, COLOR_PALETTES } from "./client_constants.js";
 
 onload = () => {
+  {
+    const cc = COLOR_PALETTES[(Math.random() * COLOR_PALETTES.length) | 0];
+    document.body.style.setProperty("--highlight-color-light", cc[0]);
+    document.body.style.setProperty("--highlight-color-dark", cc[1]);
+  }
+
   const socket = new Socket(new WebSocket(SOCKET_URL));
   let games = [];
 
   { // Add scrollbar width padding to some elements
-    const gameListHeader = document.getElementById("game-list-header");
+    const gameListHeader = document.getElementById("content-header");
     const gameList = document.getElementById("game-list");
     const scrollbarWidth = gameList.getBoundingClientRect().width - gameList.clientWidth;
     gameListHeader.style.paddingRight = `${scrollbarWidth}px`;
@@ -63,6 +68,19 @@ onload = () => {
   };
 
   socket.setReceive("games", data => {
+    if (data.games.length == games.length) {
+      let sameGames = true;
+      for (let i = 0; i < games.length; i++) {
+        if (games[i].id != data.games[i].id) {
+          sameGames = false;
+        }
+      }
+      if (sameGames) {
+        // TODO: update time
+        return;
+      }
+    }
+
     games = data.games;
     refreshGameItems();
   });
@@ -87,7 +105,7 @@ onload = () => {
   document.getElementById("private-game").onclick = () => createGame("private");
   // document.getElementById("ai-game").onclick = () => createGame("ai");
 
-  document.querySelectorAll("#game-list-header > h1").forEach((value, key) => {
+  document.querySelectorAll("#content-header > h1").forEach((value, key) => {
     value.onclick = () => {
       if (selectedSort == key)
         ascendingSort = !ascendingSort;

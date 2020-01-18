@@ -1,9 +1,15 @@
 import Socket from "./socket.js";
 import ClientBoard from "./client_board.js";
-import { WHITE, SOCKET_URL, TURN_TYPE } from "./client_constants.js";
+import { WHITE, SOCKET_URL, TURN_TYPE, COLOR_PALETTES } from "./client_constants.js";
 import Log from "./log.js";
 
 onload = () => {
+  {
+    const cc = COLOR_PALETTES[(Math.random() * COLOR_PALETTES.length) | 0];
+    document.body.style.setProperty("--highlight-color-light", cc[0]);
+    document.body.style.setProperty("--highlight-color-dark", cc[1]);
+  }
+
   // Constant values
   const socket = new Socket(new WebSocket(SOCKET_URL));
   const board = new ClientBoard(document.querySelector("#yinsh-board"));
@@ -127,13 +133,13 @@ onload = () => {
   };
 
   onmousemove = e => {
-    mouse.x = e.pageX - board.ctx.canvas.offsetLeft;
-    mouse.y = e.pageY - board.ctx.canvas.offsetTop;
+    const rect = board.ctx.canvas.getBoundingClientRect()
+    mouse.x = e.pageX - rect.left;
+    mouse.y = e.pageY - rect.top;
   };
 
   onclick = e => {
-    mouse.x = e.pageX - board.ctx.canvas.offsetLeft;
-    mouse.y = e.pageY - board.ctx.canvas.offsetTop;
+    onmousemove(e);
 
     if (e.button == 0) {
 

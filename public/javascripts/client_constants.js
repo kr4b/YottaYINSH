@@ -21,4 +21,43 @@ const TURN_TYPE = { "ring": 0, "marker": 1, "none": 2, "remove": 3 };
 const AVAILABILITY = { "open": 0, "private": 1, "full": 2 };
 const ICONS = ["&#x1f513;", "&#x1f510;", "&#x1f441;"];
 
-export { WHITE, BLACK, WHITE_COLOR, BLACK_COLOR, WIN_RINGS, WHITE_HINT_COLOR, BLACK_HINT_COLOR, INTERSECTIONS, SOCKET_URL, TURN_TYPE, AVAILABILITY, ICONS, POINT_OFFSET, NUMBER_INDEX, LETTER_INDEX };
+const COLOR_PALETTES = [
+  /* [ light, dark ]  */
+  /* default          */
+  ["#9b59b6", "#8e44ad"], /* [ amethyst, wisteria ] */
+  ["#95a5a6", "#7f8c8d"], /* [ concrete, asbestos ] */
+  ["#3498db", "#2980b9"], /* [ peter river, belize hole ] */
+  ["#1abc9c", "#16a085"], /* [ turquoise, green sea ] */
+  /* fr */
+  ["#38ada9", "#079992"], /* [ waterfall, reef encounter ] */
+  /* nl */
+  ["#B53471", "#833471"], /* [ very berry, hollyhock ] */
+  /* in */
+  ["#B33771", "#6D214F"], /* [ fiery fuchsia, magenta purple ] */
+  /* es */
+  ["#ffb142", "#cc8e35"], /* [ mandarin sorbet, alameda ochre ] */
+  ["#ff793f", "#cd6133"], /* [ synthetic pumpkin, chilean fire ] */
+  ["#ff5252", "#b33939"], /* [ fluorescent red, eye of newt ] */
+  ["#34ace0", "#227093"], /* [ summer sky, devil blue ] */
+  /* gb */
+  ["#e84118", "#c23616"]  /* [ nasturcian flower, harley davidson orange ] */
+];
+
+export {
+  WHITE,
+  BLACK,
+  WHITE_COLOR,
+  BLACK_COLOR,
+  WIN_RINGS,
+  WHITE_HINT_COLOR,
+  BLACK_HINT_COLOR,
+  INTERSECTIONS,
+  SOCKET_URL,
+  TURN_TYPE,
+  AVAILABILITY,
+  ICONS,
+  POINT_OFFSET,
+  NUMBER_INDEX,
+  LETTER_INDEX,
+  COLOR_PALETTES
+};

@@ -6,41 +6,43 @@
   <link rel="icon" href="images/logo.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Yotta YINSH</title>
+  <title>YottaYINSH</title>
 
-  <link rel="stylesheet" href="stylesheets/game.css">
-  <link rel="stylesheet" href="stylesheets/style.css">
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <link rel="stylesheet" href="/stylesheets/game.css">
 
-  <script src="javascripts/main.js" type="module"></script>
+  <script src="/javascripts/main.js" type="module"></script>
 </head>
 
 <body>
 
-  <div id="spectating">
-    <h2>&#x1f441; Spectating</h2>
-  </div>
+  <main class="unselectable">
 
-  <div class="full-size overlay" id="overlay">
-    <canvas class="full-size" id="yinsh-board"></canvas>
-  </div>
+    <section id="menu">
 
-  <div id="endscreen"></div>
+      <h1 id="menu-header">
+        ottaYINSH
+      </h1>
 
-  <div class="full-size">
-    <div id="waiting">
-      <h1>Waiting for opponent...</h1>
-      <p>Send someone your URL to directly invite them to this game.</p>
-      <div class="loader">
-        <div></div>
-      </div>
-    </div>
-  </div>
+      <section id="log">
 
-  <div id="log">
-    <div>
-      <div id="log-container"></div>
-    </div>
-  </div>
+      </section>
+
+    </section>
+
+    <section id="content-container">
+
+      <section id="canvas-container">
+        <canvas id="yinsh-board"></canvas>
+      </section>
+
+    </section>
+
+    <section id="footer-left">
+      <label for="name">Your name is:</label>
+      <input type="text" name="name" id="name-input" placeholder="Guest" disabled>
+    </section>
+  </main>
 
 </body>
 
