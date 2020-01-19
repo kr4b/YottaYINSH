@@ -106,18 +106,18 @@ class RingMoveAnimation extends BoardAnimation {
       audioPlayer.playAudio("MOVE");
     }
 
-    this.board.ctx.fillStyle = this.side == BLACK ? WHITE_COLOR : BLACK_COLOR;
+    this.board.setFill(this.side);
     this.board.drawSingleMarker(this.from.vertical, this.from.point);
 
     for (let key in this.flipped) {
       const index = this.flipped[key];
       const position = getPosition(index);
 
-      this.board.ctx.fillStyle = this.board.markers[index] == BLACK ? WHITE_COLOR : BLACK_COLOR;
+      this.board.setFill(this.board.markers[index]);
       this.board.ctx.globalAlpha = Math.max(0, 1 - frac);
       this.board.drawSingleMarker(position.vertical, position.point);
 
-      this.board.ctx.fillStyle = this.board.markers[index] == BLACK ? BLACK_COLOR : WHITE_COLOR;
+      this.board.setFill((this.board.markers[index] + 1) % 2);
       this.board.ctx.globalAlpha = Math.min(1, frac);
       this.board.drawSingleMarker(position.vertical, position.point);
     }
@@ -174,12 +174,12 @@ class RingRemoveAnimation extends BoardAnimation {
     this.board.ctx.globalAlpha = 1;
     for (let i = index + 1; i < 5; i++) {
       const position = getPosition(this.row[i]);
-      this.board.ctx.fillStyle = this.side == BLACK ? WHITE_COLOR : BLACK_COLOR;
+      this.board.setFill(this.side);
       this.board.drawSingleMarker(position.vertical, position.point);
     }
 
     const position = getPosition(this.row[index]);
-    this.board.ctx.fillStyle = this.side == BLACK ? WHITE_COLOR : BLACK_COLOR;
+    this.board.setFill(this.side);
     this.board.ctx.globalAlpha = 1 - (Math.min(0.99, frac) * 5) % 1;
     this.board.drawSingleMarker(position.vertical, position.point);
 

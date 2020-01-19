@@ -133,13 +133,13 @@ export default
 
     { // Draw the vertical and point indications
       const padding = 20;
-  
+
       let letter = 97;
       for (let index of LETTER_INDEX) {
         const { x, y } = this.getCanvasCoordinate((index / 11) | 0, index % 11);
         this.ctx.fillText(String.fromCodePoint(letter++), x, y + padding)
       }
-  
+
       let number = 1;
       for (let index of NUMBER_INDEX) {
         const { x, y } = this.getCanvasCoordinate((index / 11) | 0, index % 11);
@@ -204,7 +204,11 @@ export default
   }
 
   setStroke(side) {
-    this.ctx.strokeStyle = side == BLACK ? WHITE_COLOR : BLACK_COLOR;
+    this.ctx.strokeStyle = side == BLACK ? BLACK_COLOR : WHITE_COLOR;
+  }
+
+  setFill(side) {
+    this.ctx.fillStyle = side == BLACK ? BLACK_COLOR : WHITE_COLOR;
   }
 
   // Renders the collected rings
@@ -218,7 +222,7 @@ export default
     for (let i = 0; i < WIN_RINGS; i++) {
       if (i >= this.getRingsRemoved(side)) {
         this.ctx.globalAlpha = .5;
-        this.ctx.strokeStyle = side == BLACK ? WHITE_HINT_COLOR : BLACK_HINT_COLOR;
+        this.ctx.strokeStyle = side == BLACK ? BLACK_HINT_COLOR : WHITE_HINT_COLOR;
       } else {
         this.setStroke(side);
       }
@@ -270,7 +274,7 @@ export default
     {
       if (outline) this.ctx.globalAlpha = .5;
 
-      this.ctx.fillStyle = side == BLACK ? WHITE_COLOR : BLACK_COLOR;
+      this.setFill(side);
       this.drawSingleMarker(vertical, point);
     }
 
