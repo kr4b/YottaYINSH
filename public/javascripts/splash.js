@@ -54,6 +54,30 @@ onload = () => {
     }
   };
 
+  const updateExistingGameItems = async () => {
+    const list = document.getElementById("game-list").children;
+    let i = 0;
+    for (let game of games) {
+      const time = Math.floor(game.elapsedTime / 3600).toString().padStart(2, "0")
+        + ":" + Math.floor(game.elapsedTime / 60 % 60).toString().padStart(2, "0")
+        + ":" + (game.elapsedTime % 60).toString().padStart(2, "0");
+
+
+      if (list[i].children[0].title != game.availability) { // Update availability title & html
+        list[i].children[0].title = game.availability;
+        list[i].children[0].innerHTML = ICONS[AVAILABILITY[game.availability]];
+      }
+      
+      const lastIndex = list[i].children.length - 1;
+      const playerCount = `${(game.player1 ? 1 : 0) + (game.player2 ? 1 : 0)}/2`;
+      if (list[i].children[lastIndex - 1].innerHTML != playerCount) // Update playercount html
+        list[i].children[lastIndex - 1].innerHTML = playerCount
+
+      list[i].children[lastIndex].innerHTML = time;
+      i++;
+    }
+  }
+
   socket.ws.onopen = () => {
     if (sessionStorage.getItem("id") == null) socket.send("session", {});
 
@@ -76,7 +100,8 @@ onload = () => {
         }
       }
       if (sameGames) {
-        // TODO: update time
+        games = data.games;
+        updateExistingGameItems();
         return;
       }
     }

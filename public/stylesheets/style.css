@@ -157,7 +157,7 @@ main {
   background-color: var(--menu-bg-color);
 }
 
-#footer-left > label {
+.name-label {
   width: 60%;
 
   font-size: 1.2em;
@@ -165,9 +165,10 @@ main {
   opacity: .7;
 }
 
-#name-input {
+.name-input {
   width: 60%;
   padding: .1em;
+  box-sizing: border-box;
 
   font-family: inherit;
   font-size: 2em;

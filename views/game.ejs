@@ -32,8 +32,7 @@
         </section>
 
 
-        <section id="log-container">
-        </section>
+        <section id="log-container"></section>
       </section>
 
     </section>
@@ -41,14 +40,30 @@
     <section id="content-container">
 
       <section id="canvas-container">
-        <canvas id="yinsh-board"></canvas>
+        <canvas id="yinsh-board" class="blurred"></canvas>
       </section>
+
+      <section id="waitscreen">
+        <h1>Waiting for another player</h1>
+      </section>
+
+      <section id="endscreen" class="hidden">
+        <h1>Congratulations</h1>
+        <h1 id="endscreen-name"></h1>
+        <h1 id="endscreen-side"></h1>
+      </section>
+
 
     </section>
 
     <section id="footer-left">
-      <label for="name">Your name is:</label>
-      <input type="text" name="name" id="name-input" placeholder="Guest" disabled>
+      <section id="you">
+        <input type="text" name="name1" class="name-input" placeholder="Guest" disabled>
+      </section>
+      <h1>/</h1>
+      <section id="opponent">
+        <input type="text" name="name2" class="name-input" placeholder="Guest" disabled>
+      </section>
     </section>
   </main>
 

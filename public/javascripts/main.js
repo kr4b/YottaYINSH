@@ -12,7 +12,7 @@ onload = () => {
 
   // Constant values
   const socket = new Socket(new WebSocket(SOCKET_URL));
-  const board = new ClientBoard(document.querySelector("#yinsh-board"));
+  const board = new ClientBoard(document.getElementById("yinsh-board"));
   const log = new Log(board);
   const url = new URL(window.location);
   const gameId = url.searchParams.get("id");
@@ -42,7 +42,7 @@ onload = () => {
 
   socket.setReceive("join", data => {
     if (data.role == "spectating") {
-      document.querySelector("#spectating").style.display = "block";
+      // document.querySelector("#spectating").style.display = "block";
       board.rings = data.board.rings;
       board.markers = data.board.markers;
       board.ringsRemoved = data.board.ringsRemoved;
@@ -52,8 +52,8 @@ onload = () => {
       return;
     }
 
-    // document.querySelector("#overlay").classList.remove("overlay");
-    // document.querySelector("#waiting").parentElement.style.display = "none";
+    document.getElementById("yinsh-board").classList.remove("blurred");
+    document.getElementById("waitscreen").classList.add("hidden");
     board.resize();
     update();
   });
@@ -85,7 +85,7 @@ onload = () => {
   socket.setReceive("boardUpdate", data => {
     const logContainer = document.getElementById("log-container");
     const logResult = log.addLog(data.turnCounter, data.log);
-    if (logResult.text) {
+    if (logResult && logResult.text) {
       const turnNumber = logResult.text.replace(/^([0-9]+)-.*$/, "$1");
       const side = logResult.text.replace(/^.*(BLACK|WHITE).*$/i, "$1");
       const moveData = logResult.text.replace(/^.*\./, "");
@@ -98,7 +98,7 @@ onload = () => {
         </div>`;
     }
 
-    if (logResult.animation) {
+    if (logResult && logResult.animation) {
       animations.push(logResult.animation);
     }
   });
@@ -115,9 +115,14 @@ onload = () => {
       winner = board.name1;
     }
 
-    const endscreen = document.querySelector("#endscreen");
-    endscreen.innerHTML = `${winner}<div>won the game</div>`;
-    endscreen.classList.add("visible");
+    const endscreenName = document.getElementById("endscreen-name");
+    const endscreenSide = document.getElementById("endscreen-side");
+  
+    document.getElementById("yinsh-board").classList.add("blurred");
+    document.getElementById("endscreen").classList.remove("hidden");
+
+    endscreenName.innerHTML = winner;
+    endscreenSide.innerHTML = `${data.winner} won the game`;
 
     // setTimeout(() => {
     //   window.location.assign("/");
