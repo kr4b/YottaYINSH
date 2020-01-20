@@ -1,250 +1,168 @@
-main {
-  position: relative;
-
-  width: 100%;
-  height: 100%;
-
-  display: grid;
+#menu {
+  grid-template-areas: "menu-header" "description" "stats-list";
+  grid-template-rows: 1fr 3fr 3fr;
   grid-template-columns: 1fr;
-  grid-template-rows: 2fr 1fr minmax(0, 6fr);
-  row-gap: 1em;
-  grid-template-areas:
-    "title"
-    "name"
-    "games";
 }
 
-#title {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  
-  width: 100%;
-  position: relative;
+#description, #stat-list {
+  font-size: 1.2em;
+  color: var(--text-color-light);
 }
 
-/* title */
-#title {
-  grid-area: title;
-}
-
-#title > h1 {
-  --height: 6em;
-  --font-size: 5em;
-
-  height: var(--height);
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-
-  font-size: 1em;
+#description > h1, #stat-list > h1 {
+  font-variant: small-caps;
+  font-size: 2em;
+  padding: 0;
   margin: 0;
 }
 
-#title > h1 > div {
-  background-image: url('../images/logo.png');
-  background-position: center center;
-  background-repeat: no-repeat;
-  background-size: contain;
-  width: var(--font-size);
-  height: var(--font-size);
+#description {
+  grid-area: description;
+
+  text-align: justify;
 }
 
-#title > h1 > span {
-  font-size: var(--font-size);
+#stat-list {
+  grid-area: stats-list;
 }
 
-#name {
-  grid-area: name;
+#content-header {
+  grid-area: content-header;
+
+  background-color: var(--highlight-color-light);
 }
 
-#name {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  
-  width: 100%;
-  position: relative;
+#content-header > h1:hover {
+  background-color: var(--highlight-color-dark);
 }
 
-#name > p {
-  font-weight: bold;
-  margin: 5px;
-  color: #2c3e50;
-}
-
-#name > input[type=text] {
-  text-align: center;
-  color: #2c3e50;
-  background: #ecf0f1;
-	border: none;
-	border-bottom: 2px solid #2c3e50;
-	outline: none;
-  font-style: italic;
-  font-weight: bold;
-}
-
-/* games */
-#games {
-  width: 100%;
-  height: 100%;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-#games > #list, #games > #list-header {
-  width: 60%;
-  border: 2px solid var(--text-color-dark);
-}
-
-#games > #list-header {
-  border-radius: 5px 5px 0 0;
-}
-
-#games > #list-header > .item > div:hover {
-  cursor: pointer;
-}
-
-#games > #list {
-  height: 100%;
-
-  display: flex;
-  flex-direction: column;
-
-  border-radius: 0 0 5px 5px;
-  border-top: none;
-
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
-#create, .item {
-  width: 100%;
-  height: 5em;
-  flex-shrink: 0;
-}
-
-.item {
-  display: grid;
-  grid-template-columns: 1fr 2fr 2fr 1fr 1fr;
-  grid-template-rows: 1fr;
-  grid-template-areas: "visibility p1 p2 players time";
-}
-
-#create {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-  align-items: center;
-}
-
-#create > div {
-  width: 25%;
-  height: 70%;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  color: var(--text-color-light);
-  background-color: var(--play-button-color);
-  box-shadow: 0 .45em var(--play-button-shadow);
-  box-sizing: content-box;
-  transform: translateY(0em);
-
-  transition: all .2s;
-
-  border-radius: 5px;
-}
-
-#create > div:hover {
-  transform: translateY(.2em);
-  box-shadow: 0 .3em var(--play-button-shadow);
-}
-
-#create > div:active {
-  transform: translateY(.45em);
-  box-shadow: 0 0em var(--play-button-color);
-  background-color: var(--play-button-shadow);
-}
-
-#list-header > .item {
-  background-color: var(--text-color-dark);
-  color: var(--text-color-light);
-}
-
-#list > .item {
-  margin: .1em 0;
-  background-color: var(--text-color-light);
-  color: var(--text-color-dark);
-}
-
-#list > .item:hover {
-  box-shadow: inset 0 0 .1em .2em var(--text-color-dark);
-}
-
-.item > div {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-}
-
-#list-header > .item > div::after {
+#content-header > h1::after {
   content: "▲";
+  font-size: 0.75em;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
   position: absolute;
   right: 1ch;
-  height: 3ex;
+  height: 100%;
 }
 
-#list > .item > .visibility {
-  grid-area: visibility;
-  font-size: 1.5em;
-}
-
-#list > .item > .player:first-of-type {
-  grid-area: p1;
-}
-
-#list > .item > .player:last-of-type {
-  grid-area: p2;
-}
-
-#list > .item > .player-count {
-  grid-area: players; 
-}
-
-#list > .item > .time {
-  grid-area: time; 
-}
-
-#list-header > .item > div.ascending::after {
-  animation: rotateToUp .3s ease-in-out forwards;
-}
-
-#list-header > .item > div:not(.ascending)::after {
-  animation: rotateToDown .3s ease-in-out forwards;
-}
+#content-header > h1.ascending::after { animation: rotateToUp .2s ease-in-out forwards; }
+#content-header > h1:not(.ascending)::after { animation: rotateToDown .2s ease-in-out forwards; }
 
 @keyframes rotateToUp {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(180deg);
-  }
+  from { transform: rotate(0deg); }
+  100% { transform: rotate(180deg); }
 }
 
 @keyframes rotateToDown {
-  0% {
-    transform: rotate(180deg);
+  0% { transform: rotate(180deg); }
+  to { transform: rotate(0deg); }
+}
+
+@media (orientation: portrait) {
+  #content-header > h1::after {
+    display: none;
   }
-  100% {
-    transform: rotate(0deg);
-  }
+}
+
+#game-list {
+  grid-area: main-content;
+
+  border: 1px solid var(--highlight-color-light);
+  border-top: none;
+  border-right: none;
+
+  overflow-x: hidden;
+  overflow-y: scroll;
+
+  box-sizing: border-box;
+
+  min-width: 0;
+  padding-top: 1ex;
+}
+
+#game-list > .game-item {
+  height: 3em;
+
+  position: relative;
+
+  color: var(--text-color-light);
+  font-size: 1.25em;
+}
+
+.game-item::before {
+  content: "";
+
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  border-top: 1px solid var(--highlight-color-light);
+  border-bottom: 1px solid var(--highlight-color-light);
+
+  transform: scaleX(0);
+  transition: transform .3s ease-in-out;
+}
+
+.game-item:hover::before {
+  transform: scaleX(.8);
+}
+
+.game-item > div {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  
+  overflow: hidden;
+}
+
+.game-item > .visibility {
+  font-size: 1.2em;
+}
+
+#content-header, .game-item {
+  display: -ms-grid;
+  display: grid;
+  grid-template-areas: "visibility player1 player2 playercount time";
+  grid-template-rows: 1fr;
+  grid-template-columns: .5fr 1fr 1fr .5fr .5fr;
+}
+
+#footer-right > .button {
+  width: 15%;
+  padding: .75em;
+
+  font-size: 1.225em;
+
+  color: var(--text-color-light);
+  background-color: var(--highlight-color-light);
+
+  text-align: center;
+  
+  transform: translateY(0);
+  box-shadow: 0 .45em var(--highlight-color-dark);
+  border-radius: 3px;
+
+  transition: transform .1s, box-shadow .1s;
+}
+
+#footer-right > .button:hover {
+  transform: translateY(.15em);  
+  box-shadow: 0 .3em var(--highlight-color-dark);
+}
+
+#footer-right > .button:active {
+  transform: translateY(.3em);  
+  box-shadow: 0 .15em var(--highlight-color-dark);
 }

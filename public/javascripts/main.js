@@ -1,18 +1,34 @@
 import Socket from "./socket.js";
 import ClientBoard from "./client_board.js";
-import { WHITE, SOCKET_URL, TURN_TYPE } from "./client_constants.js";
+import { WHITE, SOCKET_URL, TURN_TYPE, COLOR_PALETTES } from "./client_constants.js";
 import Log from "./log.js";
 import AudioPlayer from "./audio.js";
 
 onload = () => {
+  {
+    const cc = COLOR_PALETTES[(Math.random() * COLOR_PALETTES.length) | 0];
+    document.body.style.setProperty("--highlight-color-light", cc[0]);
+    document.body.style.setProperty("--highlight-color-dark", cc[1]);
+  }
+
   // Constant values
   const socket = new Socket(new WebSocket(SOCKET_URL));
-  const board = new ClientBoard(document.querySelector("#yinsh-board"));
+  const board = new ClientBoard(document.getElementById("yinsh-board"));
   const audioPlayer = new AudioPlayer();
   const log = new Log(board);
   const url = new URL(window.location);
   const gameId = url.searchParams.get("id");
   let id = sessionStorage.getItem("id");
+
+
+  { // Add scrollbar width padding to some elements
+    const LogHeader = document.getElementById("log-header");
+    const logContainer = document.getElementById("log-container");
+    const scrollbarWidth = logContainer.getBoundingClientRect().width - logContainer.clientWidth;
+    LogHeader.style.paddingRight = `${scrollbarWidth}px`;
+    LogHeader.style.paddingLeft = `${scrollbarWidth}px`;
+    logContainer.style.paddingLeft = `${scrollbarWidth}px`;
+  }
 
   // Variables to help with board interaction
   const mouse = { x: 0, y: 0 };
@@ -28,7 +44,7 @@ onload = () => {
 
   socket.setReceive("join", data => {
     if (data.role == "spectating") {
-      document.querySelector("#spectating").style.display = "block";
+      // document.querySelector("#spectating").style.display = "block";
       board.rings = data.board.rings;
       board.markers = data.board.markers;
       board.ringsRemoved = data.board.ringsRemoved;
@@ -38,8 +54,8 @@ onload = () => {
       return;
     }
 
-    document.querySelector("#overlay").classList.remove("overlay");
-    document.querySelector("#waiting").parentElement.style.display = "none";
+    document.getElementById("yinsh-board").classList.remove("blurred");
+    document.getElementById("waitscreen").classList.add("hidden");
     board.resize();
     update();
   });
@@ -69,13 +85,22 @@ onload = () => {
   });
 
   socket.setReceive("boardUpdate", data => {
-    const logContainer = document.querySelector("#log-container");
+    const logContainer = document.getElementById("log-container");
     const logResult = log.addLog(data.turnCounter, data.log);
-    if (logResult.text) {
-      logContainer.innerHTML += `<div>${logResult.text}</div>`;
+    if (logResult && logResult.text) {
+      const turnNumber = logResult.text.replace(/^([0-9]+)-.*$/, "$1");
+      const side = logResult.text.replace(/^.*(BLACK|WHITE).*$/i, "$1");
+      const moveData = logResult.text.replace(/^.*\./, "");
+
+      logContainer.innerHTML +=
+        `<div class="log-entry">
+          <div>${turnNumber}</div>
+          <div>${side}</div>
+          <div>${moveData}</div>
+        </div>`;
     }
 
-    if (logResult.animation) {
+    if (logResult && logResult.animation) {
       animations.push(logResult.animation);
     }
   });
@@ -99,9 +124,14 @@ onload = () => {
         winner = board.name1;
       }
 
-      const endscreen = document.querySelector("#endscreen");
-      endscreen.innerHTML = `${winner}<div>won the game</div>`;
-      endscreen.classList.add("visible");
+      const endscreenName = document.getElementById("endscreen-name");
+      const endscreenSide = document.getElementById("endscreen-side");
+
+      document.getElementById("yinsh-board").classList.add("blurred");
+      document.getElementById("endscreen").classList.remove("hidden");
+
+      endscreenName.innerHTML = winner;
+      endscreenSide.innerHTML = `${data.winner} won the game`;
     }, 1500);
   });
 
@@ -133,13 +163,13 @@ onload = () => {
   };
 
   onmousemove = e => {
-    mouse.x = e.pageX - board.ctx.canvas.offsetLeft;
-    mouse.y = e.pageY - board.ctx.canvas.offsetTop;
+    const rect = board.ctx.canvas.getBoundingClientRect()
+    mouse.x = e.pageX - rect.left;
+    mouse.y = e.pageY - rect.top;
   };
 
   onclick = e => {
-    mouse.x = e.pageX - board.ctx.canvas.offsetLeft;
-    mouse.y = e.pageY - board.ctx.canvas.offsetTop;
+    onmousemove(e);
 
     if (e.button == 0) {
 

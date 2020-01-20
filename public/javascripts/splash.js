@@ -1,10 +1,24 @@
 import Socket from "./socket.js";
-import { SOCKET_URL, AVAILABILITY, ICONS } from "./client_constants.js";
-
+import { SOCKET_URL, AVAILABILITY, ICONS, COLOR_PALETTES } from "./client_constants.js";
 
 onload = () => {
+  {
+    const cc = COLOR_PALETTES[(Math.random() * COLOR_PALETTES.length) | 0];
+    document.body.style.setProperty("--highlight-color-light", cc[0]);
+    document.body.style.setProperty("--highlight-color-dark", cc[1]);
+  }
+
   const socket = new Socket(new WebSocket(SOCKET_URL));
   let games = [];
+
+  { // Add scrollbar width padding to some elements
+    const gameListHeader = document.getElementById("content-header");
+    const gameList = document.getElementById("game-list");
+    const scrollbarWidth = gameList.getBoundingClientRect().width - gameList.clientWidth;
+    gameListHeader.style.paddingRight = `${scrollbarWidth}px`;
+    gameListHeader.style.paddingLeft = `${scrollbarWidth}px`;
+    gameList.style.paddingLeft = `${scrollbarWidth}px`;
+  }
 
   // Add a game item to the list
   const addGameItem = async (gameId, availability, player1, player2, elapsedTime) => {
@@ -15,7 +29,7 @@ onload = () => {
     const item = document.createElement("div");
 
     item.onclick = () => socket.send("public", { id: gameId });
-    item.className = "item";
+    item.className = "game-item";
     item.innerHTML = `
       <div class="visibility" alt="join" title="${availability}">${ICONS[AVAILABILITY[availability]]}</div>
       <div class="player">${clean(player1 || "-")}</div>
@@ -23,17 +37,15 @@ onload = () => {
       <div class="player-count">${(player1 ? 1 : 0) + (player2 ? 1 : 0)}/2</div>
       <div class="time">${time}</div>
     `;
-    document.querySelector("#list").appendChild(item);
+    document.getElementById("game-list").appendChild(item);
   };
 
   // Clean player name to prevent HTML injection
   const clean = str => str.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
   const refreshGameItems = async () => {
-    const list = document.querySelector("#list");
-    const buttons = list.children[0];
+    const list = document.getElementById("game-list");
     list.innerHTML = "";
-    list.appendChild(buttons);
 
     const localgames = Array.from(games).sort((a, b) => sortingMethod[selectedSort](a, b) * (ascendingSort ? 1 : -1));
 
@@ -41,6 +53,30 @@ onload = () => {
       addGameItem(game.id, game.availability, game.player1, game.player2, game.elapsedTime);
     }
   };
+
+  const updateExistingGameItems = async () => {
+    const list = document.getElementById("game-list").children;
+    let i = 0;
+    for (let game of games) {
+      const time = Math.floor(game.elapsedTime / 3600).toString().padStart(2, "0")
+        + ":" + Math.floor(game.elapsedTime / 60 % 60).toString().padStart(2, "0")
+        + ":" + (game.elapsedTime % 60).toString().padStart(2, "0");
+
+
+      if (list[i].children[0].title != game.availability) { // Update availability title & html
+        list[i].children[0].title = game.availability;
+        list[i].children[0].innerHTML = ICONS[AVAILABILITY[game.availability]];
+      }
+      
+      const lastIndex = list[i].children.length - 1;
+      const playerCount = `${(game.player1 ? 1 : 0) + (game.player2 ? 1 : 0)}/2`;
+      if (list[i].children[lastIndex - 1].innerHTML != playerCount) // Update playercount html
+        list[i].children[lastIndex - 1].innerHTML = playerCount
+
+      list[i].children[lastIndex].innerHTML = time;
+      i++;
+    }
+  }
 
   socket.ws.onopen = () => {
     if (sessionStorage.getItem("id") == null) socket.send("session", {});
@@ -51,11 +87,25 @@ onload = () => {
     }, 1000);
   };
 
-  document.querySelector("#name > input").oninput = e => {
+  document.getElementById("name-input").oninput = e => {
     socket.send("name", { id: sessionStorage.getItem("id"), name: e.srcElement.value });
   };
 
   socket.setReceive("games", data => {
+    if (data.games.length == games.length) {
+      let sameGames = true;
+      for (let i = 0; i < games.length; i++) {
+        if (games[i].id != data.games[i].id) {
+          sameGames = false;
+        }
+      }
+      if (sameGames) {
+        games = data.games;
+        updateExistingGameItems();
+        return;
+      }
+    }
+
     games = data.games;
     refreshGameItems();
   });
@@ -76,11 +126,11 @@ onload = () => {
     socket.send("create", { game });
   };
 
-  document.querySelector("#public").onclick = () => createGame("public");
-  document.querySelector("#private").onclick = () => createGame("private");
-  document.querySelector("#ai").onclick = () => createGame("ai");
+  document.getElementById("public-game").onclick = () => createGame("public");
+  document.getElementById("private-game").onclick = () => createGame("private");
+  // document.getElementById("ai-game").onclick = () => createGame("ai");
 
-  document.querySelectorAll("#list-header > .item > div").forEach((value, key) => {
+  document.querySelectorAll("#content-header > h1").forEach((value, key) => {
     value.onclick = () => {
       if (selectedSort == key)
         ascendingSort = !ascendingSort;

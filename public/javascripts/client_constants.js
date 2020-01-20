@@ -48,8 +48,30 @@ const AUDIO = [
   }
 ];
 
+const COLOR_PALETTES = [
+  /* [ light, dark ]  */
+  /* default          */
+  ["#9b59b6", "#8e44ad"], /* [ amethyst, wisteria ] */
+  ["#95a5a6", "#7f8c8d"], /* [ concrete, asbestos ] */
+  ["#3498db", "#2980b9"], /* [ peter river, belize hole ] */
+  ["#1abc9c", "#16a085"], /* [ turquoise, green sea ] */
+  /* fr */
+  ["#38ada9", "#079992"], /* [ waterfall, reef encounter ] */
+  /* nl */
+  ["#B53471", "#833471"], /* [ very berry, hollyhock ] */
+  /* in */
+  ["#B33771", "#6D214F"], /* [ fiery fuchsia, magenta purple ] */
+  /* es */
+  ["#ffb142", "#cc8e35"], /* [ mandarin sorbet, alameda ochre ] */
+  ["#ff793f", "#cd6133"], /* [ synthetic pumpkin, chilean fire ] */
+  ["#ff5252", "#b33939"], /* [ fluorescent red, eye of newt ] */
+  ["#34ace0", "#227093"], /* [ summer sky, devil blue ] */
+  /* gb */
+  ["#e84118", "#c23616"]  /* [ nasturcian flower, harley davidson orange ] */
+];
+
 export {
   WHITE, BLACK, WHITE_COLOR, BLACK_COLOR, WHITE_HINT_COLOR, BLACK_HINT_COLOR,
   WIN_RINGS, INTERSECTIONS, SOCKET_URL, TURN_TYPE, AVAILABILITY, ICONS,
-  POINT_OFFSET, NUMBER_INDEX, LETTER_INDEX, AUDIO
+  POINT_OFFSET, NUMBER_INDEX, LETTER_INDEX, AUDIO, COLOR_PALETTES
 };

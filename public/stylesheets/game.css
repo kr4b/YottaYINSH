@@ -1,122 +1,207 @@
-.full-size {
-  width: 100%;
-  height: 100%;
+main {
+  grid-template-areas: "menu content-container" "footer-left content-container";
+  grid-template-rows: minmax(0, 1fr) 6.5em;
+  grid-template-columns: 1fr 2.25fr;
 }
 
-.overlay {
-  top: 0;
-  left: 0;
-  position: absolute;
-  filter: blur(5px);
-  overflow: hidden;
+#menu {
+  grid-template-areas: "menu-header" "log";
+  grid-template-rows: min-content minmax(0, 1fr);
+  grid-template-columns: 1fr;
+  row-gap: 1em;
 }
 
 #log {
-  padding: inherit;
-  position: absolute;
-  height: 50%;
-  width: 20%;
-  top: 0;
-  right: 0;
+  grid-area: log;
+
+  padding: 1em;
+  box-sizing: border-box;
+
+  width: 100%;
+  height: 100%;
+
+  display: -ms-grid;
+  display: grid;
+  grid-template-areas: "log-header" "log-container";
+  grid-template-rows: min-content minmax(0, 1fr);
+  grid-template-columns: 1fr;
+
+  overflow: hidden;
 }
 
-#log > div {
+#log-header {
+  grid-area: log-header;
+  background-color: var(--highlight-color-light);
+  border-radius: 5px 5px 0 0;
+}
+
+#log-header > h1 {
+  box-sizing: border-box;
+  padding: 1.25ch;
+}
+
+#log-container {
+  grid-area: log-container;
+  
   position: relative;
-  background-color: #95a5a6;
-  border: 2px solid #34495e;
+  padding: 1ex 0;
+
+  width: 100%;
+  height: 100%;
+  background-color: var(--game-list-bg-color);
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+
+  border-radius: 0 0 5px 5px;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+
+#log-container > .log-entry {
+  color: var(--text-color-light);
+  font-size: 1.2em;
+}
+
+.log-entry:last-of-type {
+  padding-bottom: 1ex;
+}
+
+#log-header, .log-entry {  
+  display: -ms-grid;
+  display: grid;
+  grid-template-areas: "turn-number side move-data";
+  grid-template-rows: 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
+  column-gap: 1vmin;
+}
+
+#content-container {
+  padding: 1em;
+  box-sizing: border-box;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  border-width: 1px;
+  border-style: solid;
+  border-image: linear-gradient(to right, var(--highlight-color-light), var(--menu-bg-color)) 1;
+
+  position: relative;
+}
+
+#canvas-container {
   width: 100%;
   height: 100%;
 }
 
-#log > div::before {
-  --second-border: 5px;
-  content: "";
+#canvas-container:not(:fullscreen) {
+  position: relative;
+}
+
+#canvas-container:fullscreen {
+  padding: 1.5em;
+
   position: absolute;
-  top: calc(-1 * (var(--second-border) + 2px));
-  right: calc(-1 * (var(--second-border) + 2px));
-  bottom: calc(-1 * (var(--second-border) + 2px));
-  left: calc(-1 * (var(--second-border) + 2px));
-  border: var(--second-border) solid #95a5a6;
+
+  background-color: var(--game-list-bg-color);
 }
 
-#log-container {
-  padding: 10px;
-  overflow-wrap: break-word;
-  width: calc(100% - 20px);
-  height: calc(100% - 20px);
-  overflow-x: hidden;
-  overflow-y: auto;
+#yinsh-board {
+  width: 100%;
+  height: 100%;
 }
 
-#log p {
-  padding: 0;
-  padding-bottom: 5px;
-  margin: 0;
+#yinsh-board.blurred {
+  filter: blur(5px);
 }
 
-#spectating {
+#waitscreen, #endscreen {
+  width: 40%;
+  height: 30%;
+
   position: absolute;
-  display: none;
-  padding: 0;
-  margin-top: -35px;
-  left: 50%;
-  transform: translate(-50%, 0);
-}
-
-#waiting {
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 30%;
-  height: 30%;
-  background-color: #95a5a6aa;
-  border: 5px solid #7f8c8daa;
+
+  display: grid;
+  grid-template-areas: "spinner" "message";
+  grid-template-rows: 1fr min-content;
+  grid-template-columns: 1fr;
+  
+  border: 1px solid var(--highlight-color-light);
   border-radius: 10px;
+  overflow: hidden;
 }
 
-.loader > div {
-  margin-top: 1.1vh;
-  width: 6.6vh;
-  height: 6.6vh;
+#waitscreen::before, #endscreen::before {
+  content: "";
+
+  width: 100%;
+  height: 100%;
+
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  z-index: 0;
+  
+  background-color: var(--highlight-color-dark);
+  opacity: .15;
+}
+
+#waitscreen::after {
+  content: "";
+  grid-area: spinner;
+  
+  width: 5em;
+  height: 5em;
+
+  display: flex;
+  align-self: center;
+  justify-self: center;
+
   border-radius: 50%;
-  border: 1.1vh solid white;
+  border: 1em solid white;
+  
   animation: loader 2s cubic-bezier(0, 0.2, 0.6, 0.8) infinite;
 }
 
 #endscreen {
+  width: 60%;
+  grid-template-areas: "congrats" "winner" "message";
+  grid-template-rows: min-content 1fr min-content;
+}
+
+#waitscreen > h1, #endscreen > h1 {
+  width: 100%;
+  margin: 0;
+  padding: 1ex 0;
+  box-sizing: border-box;
+
+  overflow: hidden;
+
+  text-align: center;
+  color: var(--text-color-light);
+  font-weight: normal;
+  font-size: 2em;
+
+  z-index: 1;
+}
+
+#endscreen > h1:nth-of-type(2) {
   width: 100%;
   height: 100%;
-
-  position: absolute;
-  top: -100%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0.3);
 
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
 
-  font-size: 12em;
-
-  transition: all 2s;
-
-  text-shadow: 0px 0px 7.5px var(--text-color-dark);
-  color: var(--play-button-color);
-}
-
-#endscreen.visible {
-  top: 50%;
-  transform: translate(-50%, -50%) scale(1);
-}
-
-#endscreen > div {
-  font-size: .3em;
+  font-size: 4.5em;
 }
 
 @keyframes loader {
@@ -126,4 +211,49 @@
   100% {
     transform: rotateY(360deg);
   }
+}
+
+#footer-left {
+  padding: 0 1em;
+  box-sizing: border-box;
+
+  display: grid;
+  grid-template-areas: "you h1 opponent";
+  grid-template-rows: 1fr;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 1fr) minmax(0, 4fr);
+
+  overflow: hidden;
+}
+
+#footer-left > h1 {
+  margin: 0;
+  padding: 0;
+
+  width: 100%;
+  height: 100%;
+
+  font-size: 2.25em;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#you, #opponent {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.name-input {
+  width: 100%;
+}
+
+#waitscreen.hidden, #endscreen.hidden {
+  display: none;
 }

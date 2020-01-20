@@ -6,49 +6,66 @@
   <link rel="icon" href="images/logo.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Yotta YINSH</title>
+  <title>YottaYINSH</title>
 
-  <link rel="stylesheet" href="stylesheets/style.css">
-  <link rel="stylesheet" href="stylesheets/splash.css">
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <link rel="stylesheet" href="/stylesheets/splash.css">
 
-  <script src="javascripts/splash.js" type="module"></script>
+  <script src="/javascripts/splash.js" type="module"></script>
 </head>
 
 <body>
 
   <main class="unselectable">
 
-    <section id="title">
-      <h1>
-        <div></div><span>ottaYINSH</span>
+    <section id="menu">
+
+      <h1 id="menu-header">
+        ottaYINSH
       </h1>
-      <h3>10<sup>24</sup> hours of fun</h3>
-    </section>
 
-    <section id="name">
-      <p>Display name:</p>
-      <input type="text" placeholder="Guest">
-    </section>
-
-    <section id="games">
-      <div id="list-header">
-        <div class="item">
-          <div class="visibility">visibility</div>
-          <div class="player">player 1</div>
-          <div class="player">player 2</div>
-          <div class="player-count">players</div>
-          <div class="time">time</div>
-        </div>
-      </div>
-      <section id="list">
-        <div id="create">
-          <div id="public">Public game</div>
-          <div id="ai">Play vs AI</div>
-          <div id="private">Private game</div>
-        </div>
+      <section id="description">
+        <h1>in short</h1>
+        The players each start with 5 rings on the board. Every time a ring is moved, it leaves a marker behind. Markers
+        are white on one side and black on the other. When markers are jumped over by a ring they must be flipped, so
+        their color is constantly changing. The players must try to form a row of 5 markers with their own color face
+        up. If a player succeeds in doing so, he removes one of his rings as an indication that he has formed such a
+        row. The first player to remove 3 of his rings wins the game. In other words, each row you make brings you
+        closer to victory-but also makes you weaker, because you have one less ring to play with. Very tricky!
       </section>
+
+      <section id="stat-list">
+        <h1>statistics</h1>
+        <ul>
+          <li>100 games finished</li>
+          <li>50000 games ongoing</li>
+          <li>10<sup>24</sup> hours of fun</li>
+        </ul>
+      </section>
+
     </section>
 
+    <section id="content-container">
+      <section id="content-header">
+        <h1 class="visibility">visibility</h1>
+        <h1 class="player">player 1</h1>
+        <h1 class="player">player 2</h1>
+        <h1 class="player-count">players</h1>
+        <h1 class="time">time</h1>
+      </section>
+
+      <section id="game-list"></section>
+    </section>
+
+    <section id="footer-left">
+      <label class="name-label" for="name">Enter your name:</label>
+      <input type="text" name="name" id="name-input" class="name-input" placeholder="Guest">
+    </section>
+
+    <section id="footer-right">
+      <div class="button" id="public-game">public game</div>
+      <div class="button" id="private-game">private game</div>
+    </section>
   </main>
 
 </body>
