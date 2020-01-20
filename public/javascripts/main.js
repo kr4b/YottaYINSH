@@ -108,20 +108,19 @@ onload = () => {
   socket.setReceive("terminate", data => {
     setTimeout(() => {
       let winner;
+      let yourResult;
 
       if (side == null) {
         if (data.winner == WHITE) winner = board.name1;
         else winner = board.name2;
       } else if (side == data.winner) {
-        setTimeout(() => {
-          audioPlayer.playAudio("WIN");
-        }, 1500);
+        audioPlayer.playAudio("WIN");
         winner = board.name2;
+        yourResult = "WON";
       } else {
-        setTimeout(() => {
-          audioPlayer.playAudio("LOSE");
-        }, 1500);
+        audioPlayer.playAudio("LOSE");
         winner = board.name1;
+        yourResult = "LOST";
       }
 
       const endscreenName = document.getElementById("endscreen-name");
@@ -130,8 +129,8 @@ onload = () => {
       document.getElementById("yinsh-board").classList.add("blurred");
       document.getElementById("endscreen").classList.remove("hidden");
 
-      endscreenName.innerHTML = winner;
-      endscreenSide.innerHTML = `${data.winner} won the game`;
+      endscreenName.innerHTML = winner.replace(/\s\(YOU\)$/, "");
+      endscreenSide.innerHTML = `You ${yourResult} the game!`;
     }, 1500);
   });
 

@@ -20,6 +20,12 @@ onload = () => {
     gameList.style.paddingLeft = `${scrollbarWidth}px`;
   }
 
+  { // Set your name
+    if (sessionStorage.getItem("name")) {
+      document.getElementById("name-input").placeholder = sessionStorage.getItem("name");
+    }
+  }
+
   // Add a game item to the list
   const addGameItem = async (gameId, availability, player1, player2, elapsedTime) => {
     const time = Math.floor(elapsedTime / 3600).toString().padStart(2, "0")
@@ -88,7 +94,9 @@ onload = () => {
   };
 
   document.getElementById("name-input").oninput = e => {
-    socket.send("name", { id: sessionStorage.getItem("id"), name: e.srcElement.value });
+    const name = e.srcElement.value;
+    sessionStorage.setItem("name", name);
+    socket.send("name", { id: sessionStorage.getItem("id"), name: name });
   };
 
   socket.setReceive("games", data => {
