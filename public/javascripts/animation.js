@@ -64,10 +64,11 @@ class RingPlaceAnimation extends BoardAnimation {
   update(audioPlayer) {
     const frac = super.updateTime();
 
+    // Ring drop animation
     const coord = this.board.getCanvasCoordinate(this.vertical, this.point);
     this.board.setStroke(this.side);
-    this.board.ctx.globalAlpha = Math.min(1, frac + .3)
-    this.board.ctx.lineWidth = qlerp(this.board.ringSize * 3, this.board.ringSize * .3, frac);
+    this.board.ctx.globalAlpha = Math.min(1, frac + 0.3)
+    this.board.ctx.lineWidth = qlerp(this.board.ringSize * 3, this.board.ringSize * 0.3, frac);
 
     this.board.drawSingleRing(
       coord.x,
@@ -77,6 +78,7 @@ class RingPlaceAnimation extends BoardAnimation {
 
     this.board.ctx.globalAlpha = 1.0;
 
+    // Animation done
     if (this.done) {
       audioPlayer.playAudio("PLACE");
       this.board.rings[getIndex(this.vertical, this.point)] = this.side;
@@ -89,39 +91,57 @@ class RingPlaceAnimation extends BoardAnimation {
 class RingMoveAnimation extends BoardAnimation {
   constructor(board, from, to, flipped, side) {
     super(board);
-    // Dynamic duration so the speed of the ring movement is constant
-    this.DURATION = 600;
+    this.DURATION = 1200;
     this.from = from;
     this.to = to;
     this.flipped = flipped;
     this.side = side;
-    this.audioPlayed = false;
+    this.movePlayed = false;
+    this.markerPlayed = false;
   }
 
   update(audioPlayer) {
     const frac = super.updateTime();
+    const marker_drop = 0.5;
 
-    if (!this.audioPlayed && frac > 0.2) {
-      this.audioPlayed = true;
+    if (!this.movePlayed && frac > 0.1 + marker_drop) {
+      this.movePlayed = true;
       audioPlayer.playAudio("MOVE");
     }
 
-    this.board.setFill(this.side);
-    this.board.drawSingleMarker(this.from.vertical, this.from.point);
+    // Drop marker animation
+    let size = null;
 
+    if (frac < marker_drop) {
+      // Offset animation speed
+      const oldFrac = Math.min(1, frac * (1 / marker_drop) * 1.7);
+      size = qlerp(5 * this.board.ringSize, this.board.ringSize, oldFrac);
+      this.board.ctx.globalAlpha = Math.min(1, oldFrac + 0.3);
+      if (!this.markerPlayed && oldFrac > 0.9) {
+        audioPlayer.playAudio("MARKER");
+      }
+    }
+
+    this.board.setFill(this.side);
+    this.board.drawSingleMarker(this.from.vertical, this.from.point, size);
+
+    const newFrac = Math.max(0, frac - marker_drop) / (1 - marker_drop);
+
+    // Flip animation
     for (let key in this.flipped) {
       const index = this.flipped[key];
       const position = getPosition(index);
 
       this.board.setFill(this.board.markers[index]);
-      this.board.ctx.globalAlpha = Math.max(0, 1 - frac);
+      this.board.ctx.globalAlpha = Math.max(0, 1 - newFrac);
       this.board.drawSingleMarker(position.vertical, position.point);
 
       this.board.setFill((this.board.markers[index] + 1) % 2);
-      this.board.ctx.globalAlpha = Math.min(1, frac);
+      this.board.ctx.globalAlpha = Math.min(1, newFrac);
       this.board.drawSingleMarker(position.vertical, position.point);
     }
 
+    // Ring move animation
     const fromCoord = this.board.getCanvasCoordinate(this.from.vertical, this.from.point);
     const toCoord = this.board.getCanvasCoordinate(this.to.vertical, this.to.point);
 
@@ -130,10 +150,11 @@ class RingMoveAnimation extends BoardAnimation {
     this.board.setStroke(this.side);
 
     this.board.drawSingleRing(
-      lerp(fromCoord.x, toCoord.x, frac),
-      lerp(fromCoord.y, toCoord.y, frac),
+      lerp(fromCoord.x, toCoord.x, newFrac),
+      lerp(fromCoord.y, toCoord.y, newFrac),
     );
 
+    // Animation done
     if (this.done) {
       this.board.rings[getIndex(this.to.vertical, this.to.point)] = this.side;
       for (let key in this.flipped) {
@@ -162,6 +183,7 @@ class RingRemoveAnimation extends BoardAnimation {
   update(audioPlayer) {
     const frac = super.updateTime();
 
+    // Play marker pickup animation
     for (let i = 0; i < this.markers.length; i++) {
       if (!this.markers[i] && frac > (i * 0.2 - 0.01)) {
         this.markers[i] = true;
@@ -169,6 +191,7 @@ class RingRemoveAnimation extends BoardAnimation {
       }
     }
 
+    // Draw left over markers
     const index = Math.min(4, Math.floor(frac * 5));
 
     this.board.ctx.globalAlpha = 1;
@@ -178,11 +201,13 @@ class RingRemoveAnimation extends BoardAnimation {
       this.board.drawSingleMarker(position.vertical, position.point);
     }
 
+    // Marker fade away animation
     const position = getPosition(this.row[index]);
     this.board.setFill(this.side);
     this.board.ctx.globalAlpha = 1 - (Math.min(0.99, frac) * 5) % 1;
     this.board.drawSingleMarker(position.vertical, position.point);
 
+    // Ring removed animation
     const [x, y] = this.side == this.board.side ? [
       this.board.ctx.canvas.width - (this.board.ringSize * 2 + this.board.ringPadding) * 3 + this.board.ringWidth,
       this.board.ctx.canvas.height - (this.board.ringSize + this.board.ringPadding + this.board.ringWidth / 2),
@@ -207,6 +232,7 @@ class RingRemoveAnimation extends BoardAnimation {
       lerp(fromCoord.y, toCoord.y, frac),
     );
 
+    // Animation done
     if (this.done) {
       audioPlayer.playAudio("RING");
 

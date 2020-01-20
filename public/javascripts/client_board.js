@@ -283,10 +283,10 @@ export default
   }
 
   // Renders a single marker
-  drawSingleMarker(vertical, point) {
+  drawSingleMarker(vertical, point, size = null) {
     const coord = this.getCanvasCoordinate(vertical, point);
     this.ctx.beginPath();
-    this.ctx.arc(coord.x, coord.y, this.ringSize, 0, Math.PI * 2);
+    this.ctx.arc(coord.x, coord.y, size || this.ringSize, 0, Math.PI * 2);
     this.ctx.fill();
   }
 
