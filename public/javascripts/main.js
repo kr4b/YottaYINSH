@@ -1,6 +1,6 @@
 import Socket from "./socket.js";
 import ClientBoard from "./client_board.js";
-import { WHITE, SOCKET_URL, TURN_TYPE, COLOR_PALETTES } from "./client_constants.js";
+import { WHITE, SOCKET_URL, TURN_TYPE, COLOR_PALETTES, formatTime } from "./client_constants.js";
 import Log from "./log.js";
 import AudioPlayer from "./audio.js";
 
@@ -32,6 +32,7 @@ onload = () => {
 
   // Variables to help with board interaction
   const mouse = { x: 0, y: 0 };
+  let startTime = null;
   let pathsPerRing = null;
   let possibleRows = [];
   let targetRing = null;
@@ -50,8 +51,11 @@ onload = () => {
       board.ringsRemoved = data.board.ringsRemoved;
       board.name1 = data.name1;
       board.name2 = data.name2;
+      startTime = data.startTime;
     } else if (data.role == "waiting") {
       return;
+    } else {
+      startTime = Date.now();
     }
 
     document.getElementById("yinsh-board").classList.remove("blurred");
@@ -272,6 +276,11 @@ onload = () => {
       } else {
         animation.update(audioPlayer);
       }
+    }
+
+    if (startTime != null) {
+      const timer = document.querySelector("#footer-left > input");
+      timer.value = formatTime(Math.floor((Date.now() - startTime) / 1000));
     }
 
     requestAnimationFrame(update);

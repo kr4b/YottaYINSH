@@ -70,8 +70,15 @@ const COLOR_PALETTES = [
   ["#e84118", "#c23616"]  /* [ nasturcian flower, harley davidson orange ] */
 ];
 
+const formatTime = (elapsedTime) => {
+  return Math.floor(elapsedTime / 3600).toString().padStart(2, "0")
+    + ":" + Math.floor(elapsedTime / 60 % 60).toString().padStart(2, "0")
+    + ":" + (elapsedTime % 60).toString().padStart(2, "0");
+}
+
 export {
   WHITE, BLACK, WHITE_COLOR, BLACK_COLOR, WHITE_HINT_COLOR, BLACK_HINT_COLOR,
   WIN_RINGS, INTERSECTIONS, SOCKET_URL, TURN_TYPE, AVAILABILITY, ICONS,
-  POINT_OFFSET, NUMBER_INDEX, LETTER_INDEX, AUDIO, COLOR_PALETTES
+  POINT_OFFSET, NUMBER_INDEX, LETTER_INDEX, AUDIO, COLOR_PALETTES,
+  formatTime
 };
