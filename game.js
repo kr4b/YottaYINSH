@@ -1,5 +1,5 @@
 import Yinsh from "./yinsh.js";
-import { WHITE, BLACK, INTERSECTIONS, POINT_OFFSET } from "./public/javascripts/client_constants.js";
+import { WHITE, BLACK } from "./public/javascripts/client_constants.js";
 
 export default
   class Game {
@@ -20,6 +20,11 @@ export default
   // Checks if the game has player1 and player2
   isFull() {
     return this.player1 != null && this.player2 != null;
+  }
+
+  // Gets the current time since the start time of this game
+  getTime() {
+    return this.startTime ? Math.floor((Date.now() - this.startTime) / 1000) : 0;
   }
 
   // Adds a player to the game in the following order

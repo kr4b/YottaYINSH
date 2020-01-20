@@ -26,6 +26,10 @@
   grid-area: stats-list;
 }
 
+#stat-list > ul {
+  list-style-type: "\2767";
+}
+
 #content-header {
   grid-area: content-header;
 

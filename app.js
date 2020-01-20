@@ -9,6 +9,8 @@ import crypto from "crypto";
 
 import Game from "./game.js";
 
+import { formatTime } from "./public/javascripts/client_constants.js";
+
 const __dirname = path.resolve();
 
 const app = express();
@@ -28,7 +30,11 @@ app.use(function (req, res) {
   const gameId = req.query.id;
   const game = getGamePrivate(gameId);
   if (game == null || req.path != "/game") {
-    res.render("splash", {});
+    res.render("splash", {
+      games: games.length,
+      gamesTime: formatTime(games.reduce((acc, x) => acc + x.getTime(), 0)),
+      players: players.length
+    });
   } else {
     res.render("game", {});
   }
@@ -134,7 +140,7 @@ function sendGames() {
       availability: game.isFull() ? "full" : game.type == "private" ? "private" : "open",
       player1: game.player1 ? game.player1.name : null,
       player2: game.player2 ? game.player2.name : null,
-      elapsedTime: game.startTime ? Math.floor((Date.now() - game.startTime) / 1000) : 0,
+      elapsedTime: game.getTime(),
     };
     gamesList.push(gameData);
   }
