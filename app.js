@@ -189,9 +189,9 @@ function joinGame(ws, message) {
       board: game.yinsh.getBoardJSON(),
       name1: game.yinsh.players[0].name,
       name2: game.yinsh.players[1].name,
+      startTime: game.startTime,
     };
   }
-
 
   if (game.isFull()) {
     game.player1.ws.send(JSON.stringify({ key: "join", data: { role: "playing" } }));

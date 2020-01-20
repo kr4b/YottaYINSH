@@ -1,5 +1,5 @@
 import Socket from "./socket.js";
-import { SOCKET_URL, AVAILABILITY, ICONS, COLOR_PALETTES } from "./client_constants.js";
+import { SOCKET_URL, AVAILABILITY, ICONS, COLOR_PALETTES, formatTime } from "./client_constants.js";
 
 onload = () => {
   {
@@ -28,9 +28,7 @@ onload = () => {
 
   // Add a game item to the list
   const addGameItem = async (gameId, availability, player1, player2, elapsedTime) => {
-    const time = Math.floor(elapsedTime / 3600).toString().padStart(2, "0")
-      + ":" + Math.floor(elapsedTime / 60 % 60).toString().padStart(2, "0")
-      + ":" + (elapsedTime % 60).toString().padStart(2, "0");
+    const time = formatTime(elapsedTime);
 
     const item = document.createElement("div");
 
@@ -64,16 +62,13 @@ onload = () => {
     const list = document.getElementById("game-list").children;
     let i = 0;
     for (let game of games) {
-      const time = Math.floor(game.elapsedTime / 3600).toString().padStart(2, "0")
-        + ":" + Math.floor(game.elapsedTime / 60 % 60).toString().padStart(2, "0")
-        + ":" + (game.elapsedTime % 60).toString().padStart(2, "0");
-
+      const time = formatTime(game.elapsedTime);
 
       if (list[i].children[0].title != game.availability) { // Update availability title & html
         list[i].children[0].title = game.availability;
         list[i].children[0].innerHTML = ICONS[AVAILABILITY[game.availability]];
       }
-      
+
       const lastIndex = list[i].children.length - 1;
       const playerCount = `${(game.player1 ? 1 : 0) + (game.player2 ? 1 : 0)}/2`;
       if (list[i].children[lastIndex - 1].innerHTML != playerCount) // Update playercount html
