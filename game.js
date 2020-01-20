@@ -113,7 +113,6 @@ export default
   // Handles a players move
   // This can be either a ring placement or a ring move
   handleMove(data) {
-    this.terminateGame("BLACK");return;
     const from = data.from;
     const to = data.to;
     const side = this.yinsh.getSide();
