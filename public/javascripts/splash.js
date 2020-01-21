@@ -27,7 +27,7 @@ onload = () => {
   }
 
   // Add a game item to the list
-  const addGameItem = async (gameId, availability, player1, player2, elapsedTime) => {
+  async function addGameItem(gameId, availability, player1, player2, elapsedTime) {
     const time = formatTime(elapsedTime);
 
     const item = document.createElement("div");
@@ -47,22 +47,41 @@ onload = () => {
   // Clean player name to prevent HTML injection
   const clean = str => str.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-  const refreshGameItems = async () => {
+  // Set statistics
+  function updateStatistics(players, gameTime, activeGames) {
+    const statistics = document.querySelectorAll(".statistics");
+    statistics[0].innerHTML = activeGames;
+    statistics[1].innerHTML = players;
+    statistics[2].innerHTML = formatTime(gameTime);
+  }
+
+  async function refreshGameItems() {
     const list = document.getElementById("game-list");
     list.innerHTML = "";
 
     const localgames = Array.from(games).sort((a, b) => sortingMethod[selectedSort](a, b) * (ascendingSort ? 1 : -1));
 
+    let players = 0;
+    let gameTime = 0;
+
     for (let game of localgames) {
+      players += (game.player1 ? 1 : 0) + (game.player2 ? 1 : 0);
+      gameTime += game.elapsedTime;
       addGameItem(game.id, game.availability, game.player1, game.player2, game.elapsedTime);
     }
+
+    updateStatistics(players, gameTime, localgames.length);
   };
 
-  const updateExistingGameItems = async () => {
+  async function updateExistingGameItems() {
     const list = document.getElementById("game-list").children;
+
+    let players = 0;
+    let gameTime = 0;
     let i = 0;
     for (let game of games) {
       const time = formatTime(game.elapsedTime);
+      gameTime += game.elapsedTime;
 
       if (list[i].children[0].title != game.availability) { // Update availability title & html
         list[i].children[0].title = game.availability;
@@ -70,13 +89,17 @@ onload = () => {
       }
 
       const lastIndex = list[i].children.length - 1;
-      const playerCount = `${(game.player1 ? 1 : 0) + (game.player2 ? 1 : 0)}/2`;
+      const currentPlayers = (game.player1 ? 1 : 0) + (game.player2 ? 1 : 0);
+      const playerCount = `${currentPlayers}/2`;
+      players += currentPlayers;
       if (list[i].children[lastIndex - 1].innerHTML != playerCount) // Update playercount html
         list[i].children[lastIndex - 1].innerHTML = playerCount
 
       list[i].children[lastIndex].innerHTML = time;
       i++;
     }
+
+    updateStatistics(i, players, gameTime);
   }
 
   socket.ws.onopen = () => {
@@ -95,19 +118,19 @@ onload = () => {
   };
 
   socket.setReceive("games", data => {
-    if (data.games.length == games.length) {
-      let sameGames = true;
-      for (let i = 0; i < games.length; i++) {
-        if (games[i].id != data.games[i].id) {
-          sameGames = false;
-        }
-      }
-      if (sameGames) {
-        games = data.games;
-        updateExistingGameItems();
-        return;
-      }
-    }
+    // if (data.games.length == games.length) {
+    //   let sameGames = true;
+    //   for (let i = 0; i < games.length; i++) {
+    //     if (games[i].id != data.games[i].id) {
+    //       sameGames = false;
+    //     }
+    //   }
+    //   if (sameGames) {
+    //     games = data.games;
+    //     updateExistingGameItems();
+    //     return;
+    //   }
+    // }
 
     games = data.games;
     refreshGameItems();
@@ -125,7 +148,7 @@ onload = () => {
     socket.send("public", { id: data.id });
   });
 
-  const createGame = game => {
+  function createGame(game) {
     socket.send("create", { game });
   };
 
