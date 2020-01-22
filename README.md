@@ -1,5 +1,5 @@
 # YottaYINSH
-YINSH implementation with client and server communication using WebSocket.
+[YINSH](http://www.gipf.com/yinsh/) implementation with client and server communication using WebSocket.
 
 # Splash screen
 ![Splash screen](splash.png)
