@@ -30,7 +30,11 @@ app.use(function (req, res) {
   const gameId = req.query.id;
   const game = getGamePrivate(gameId);
   if (game == null || req.path != "/game") {
-    res.render("splash", {});
+    res.render("splash", {
+      games: games.length,
+      gamesTime: formatTime(games.reduce((acc, x) => acc + x.getTime(), 0)),
+      players: players.length
+    });
   } else {
     res.render("game", {});
   }
@@ -51,9 +55,10 @@ const players = [];
 setInterval(() => {
   for (let player of players) {
     const ws = player.ws;
-    if (ws.alive === false && !player.connected) {
+    if (ws.alive === false) {
       ws.terminate();
       player.connected = false;
+      deletePlayer(player.id);
     }
 
     ws.alive = false;

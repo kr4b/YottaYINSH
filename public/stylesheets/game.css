@@ -105,6 +105,7 @@ main {
   padding: 1.5em;
 
   position: absolute;
+  z-index: 0;
 
   background-color: var(--game-list-bg-color);
 }
@@ -135,6 +136,9 @@ main {
   border: 1px solid var(--highlight-color-light);
   border-radius: 10px;
   overflow: hidden;
+
+  opacity: 1;
+  transition: opacity .25s;
 }
 
 #waitscreen::before, #endscreen::before {
@@ -213,10 +217,49 @@ main {
   }
 }
 
+#footer-left {
+  position: relative;
+}
+
 #footer-left > input {
   text-align: center;
 }
 
 #waitscreen.hidden, #endscreen.hidden {
+  opacity: 0;
   display: none;
+}
+
+#fullscreen {
+  position: absolute;
+  bottom: 1em;
+  left: 1em;
+  width: 2em;
+  height: 1em;
+  transition: transform .1s;
+}
+#fullscreen::before, #fullscreen::after {
+  content: "";
+  display: block;
+  border: 2px solid var(--text-color-light);
+  width: 10%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+}
+#fullscreen::before {
+  border-right: none;
+  left: 0;
+}
+#fullscreen::after {
+  border-left: none;
+  right: 0;
+}
+
+#fullscreen:hover {
+  transform: scale(1.2, 1.2);
+}
+
+#fullscreen:active::before, #fullscreen:active::after {
+  border-color: var(--highlight-color-light);
 }

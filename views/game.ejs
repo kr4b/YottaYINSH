@@ -41,22 +41,23 @@
 
       <section id="canvas-container">
         <canvas id="yinsh-board" class="blurred"></canvas>
+        <section id="waitscreen">
+          <h1>Waiting for another player</h1>
+        </section>
+  
+        <section id="endscreen" class="hidden">
+          <h1>The winner is:</h1>
+          <h1 id="endscreen-name"></h1>
+          <h1 id="endscreen-side"></h1>
+        </section>
       </section>
 
-      <section id="waitscreen">
-        <h1>Waiting for another player</h1>
-      </section>
-
-      <section id="endscreen" class="hidden">
-        <h1>The winner is:</h1>
-        <h1 id="endscreen-name"></h1>
-        <h1 id="endscreen-side"></h1>
-      </section>
 
 
     </section>
 
     <section id="footer-left">
+      <div title="fullscreen" id="fullscreen"></div>
       <input type="text" name="time" class="name-input" placeholder="00:00:00" disabled>
     </section>
   </main>
