@@ -46,6 +46,7 @@ onload = () => {
 
   socket.setReceive("join", data => {
     if (data.role == "spectating") {
+      document.getElementById("spectating").style.display = "block";
       socket.send("boardRequest", { game: gameId });
       board.name1 = data.name1;
       board.name2 = data.name2;
@@ -140,6 +141,7 @@ onload = () => {
     if (side == null) {
       if (data.winner == WHITE) winner = board.name1;
       else winner = board.name2;
+      yourResult = "WATCHED"
     } else if (side == data.winner) {
       setTimeout(() => {
         audioPlayer.playAudio("WIN");

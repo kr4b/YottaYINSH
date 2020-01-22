@@ -4,10 +4,8 @@ import { AVAILABILITY, ICONS, COLOR_PALETTES, formatTime } from "./client_consta
 onload = () => {
   { // Alert whether screen size is good or bad
     function alertScreen(media) {
-      if (media.matches) {
-        alert("Screen size is good! :)")
-      } else {
-        alert("Screen size is bad! :(")
+      if (!media.matches) {
+        alert("Screen size is bad! :(");
       }
     }
 

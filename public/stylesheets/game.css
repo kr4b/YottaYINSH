@@ -119,6 +119,19 @@ main {
   filter: blur(5px);
 }
 
+#spectating {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, 0);
+
+  color: var(--text-color-light);
+  font-size: 2.25em;
+
+  opacity: 0.3;
+  display: none;
+}
+
 #waitscreen, #endscreen {
   width: 40%;
   height: 30%;
@@ -223,6 +236,15 @@ main {
 
 #footer-left > input {
   text-align: center;
+}
+
+.name-input:first-of-type {
+  border-top: 1px solid var(--highlight-color-light);
+  border-bottom: none;
+}
+.name-input:last-of-type {
+  border-bottom: 1px solid var(--highlight-color-light);
+  border-top: none;
 }
 
 #waitscreen.hidden, #endscreen.hidden {

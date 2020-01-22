@@ -39,7 +39,16 @@ export default
       return;
     } else if (this.player1 == null) {
       this.player1 = player;
-      this.player1.ws.on("close", () => { this.terminateGame(WHITE) });
+      this.player1.ws.on("close", () => {
+        if (this.yinsh.players.length == 2) {
+          this.terminateGame(
+            this.player1.id == this.yinsh.players[0].id ?
+            BLACK : WHITE
+          );
+        } else {
+          this.terminateGame(WHITE);
+        }
+      });
       if (this.type == "ai") {
         this.player2 = {
           ai: true,
@@ -98,8 +107,12 @@ export default
     message = JSON.stringify(message);
     if (this.player1) this.player1.ws.send(message);
     if (this.player2) this.player2.ws.send(message);
-    for (let i = 0; i < this.spectators.length; i++) {
-      this.spectators[i].ws.send(message);
+    for (let i = this.spectators.length - 1; i >= 0; i--) {
+      if (this.spectators[i].ws) {
+        this.spectators[i].ws.send(message);
+      } else {
+        this.spectators.splice(i, 1);
+      }
     }
   }
 
