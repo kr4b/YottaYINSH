@@ -272,7 +272,9 @@ onload = () => {
 
   function update() {
     const turnIndicator = document.querySelector("#footer-left > input:nth-of-type(1)");
-    turnIndicator.value = `Turn: ${turnType == TURN_TYPE["none"] ? board.name1 : board.name2}`;
+    turnIndicator.value = `Turn: ${turnType == TURN_TYPE["none"] ?
+      board.name1.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, "\"") :
+      board.name2.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, "\"")}`;
 
     board.ctx.clearRect(0, 0, board.ctx.canvas.width, board.ctx.canvas.height);
 

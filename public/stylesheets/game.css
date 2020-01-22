@@ -62,6 +62,7 @@ main {
 #log-container > .log-entry {
   color: var(--text-color-light);
   font-size: 1.2em;
+  text-align: center;
 }
 
 .log-entry:last-of-type {
