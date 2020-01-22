@@ -41,7 +41,6 @@ class BoardAnimation {
     const diff = new Date().getTime() - this.start;
 
     if (diff >= this.DURATION) {
-      this.updateBoard();
       this.done = true;
     }
 
@@ -88,6 +87,7 @@ class RingPlaceAnimation extends BoardAnimation {
 
     // Animation done
     if (this.done) {
+      this.updateBoard();
       audioPlayer.playAudio("PLACE");
     }
   }
@@ -160,6 +160,10 @@ class RingMoveAnimation extends BoardAnimation {
       lerp(fromCoord.x, toCoord.x, newFrac),
       lerp(fromCoord.y, toCoord.y, newFrac),
     );
+
+    if (this.done) {
+      this.updateBoard();
+    }
   }
 }
 
@@ -229,6 +233,7 @@ class RingRemoveAnimation extends BoardAnimation {
 
     // Animation done
     if (this.done) {
+      this.updateBoard();
       audioPlayer.playAudio("RING");
     }
   }
