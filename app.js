@@ -30,7 +30,11 @@ app.use(function (req, res) {
   const gameId = req.query.id;
   const game = getGamePrivate(gameId);
   if (game == null || req.path != "/game") {
-    res.render("splash", {});
+    res.render("splash", {
+      games: games.length,
+      gamesTime: formatTime(games.reduce((acc, x) => acc + x.getTime(), 0)),
+      players: players.length
+    });
   } else {
     res.render("game", {});
   }
