@@ -1,5 +1,5 @@
 import Socket from "./socket.js";
-import { SOCKET_URL, AVAILABILITY, ICONS, COLOR_PALETTES, formatTime } from "./client_constants.js";
+import { AVAILABILITY, ICONS, COLOR_PALETTES, formatTime } from "./client_constants.js";
 
 onload = () => {
   { // Alert whether screen size is good or bad
@@ -22,7 +22,7 @@ onload = () => {
     document.body.style.setProperty("--highlight-color-dark", cc[1]);
   }
 
-  const socket = new Socket(new WebSocket(SOCKET_URL));
+  const socket = new Socket(new WebSocket(location.origin.replace(/^http/, 'ws')));
   let games = [];
 
   { // Cookie to keep track of the amount of visits

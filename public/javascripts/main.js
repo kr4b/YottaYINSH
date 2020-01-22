@@ -1,6 +1,6 @@
 import Socket from "./socket.js";
 import ClientBoard from "./client_board.js";
-import { WHITE, SOCKET_URL, TURN_TYPE, COLOR_PALETTES, formatTime } from "./client_constants.js";
+import { WHITE, TURN_TYPE, COLOR_PALETTES, formatTime } from "./client_constants.js";
 import Log from "./log.js";
 import AudioPlayer from "./audio.js";
 
@@ -12,7 +12,7 @@ onload = () => {
   }
 
   // Constant values
-  const socket = new Socket(new WebSocket(SOCKET_URL));
+  const socket = new Socket(new WebSocket(location.origin.replace(/^http/, 'ws')));
   const board = new ClientBoard(document.getElementById("yinsh-board"));
   const audioPlayer = new AudioPlayer();
   const log = new Log(board);

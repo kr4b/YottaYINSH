@@ -15,7 +15,6 @@ const BLACK_COLOR = "#111";
 const WHITE_HINT_COLOR = "#999";
 const BLACK_HINT_COLOR = "#111";
 
-const SOCKET_URL = "ws://localhost:3000";
 const TURN_TYPE = { "ring": 0, "marker": 1, "none": 2, "remove": 3 };
 
 const AVAILABILITY = { "open": 0, "private": 1, "full": 2 };
@@ -78,7 +77,7 @@ const formatTime = (elapsedTime) => {
 
 export {
   WHITE, BLACK, WHITE_COLOR, BLACK_COLOR, WHITE_HINT_COLOR, BLACK_HINT_COLOR,
-  WIN_RINGS, INTERSECTIONS, SOCKET_URL, TURN_TYPE, AVAILABILITY, ICONS,
+  WIN_RINGS, INTERSECTIONS, TURN_TYPE, AVAILABILITY, ICONS,
   POINT_OFFSET, NUMBER_INDEX, LETTER_INDEX, AUDIO, COLOR_PALETTES,
   formatTime
 };
