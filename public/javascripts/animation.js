@@ -118,6 +118,7 @@ class RingMoveAnimation extends BoardAnimation {
       size = qlerp(5 * this.board.ringSize, this.board.ringSize, oldFrac);
       this.board.ctx.globalAlpha = Math.min(1, oldFrac + 0.3);
       if (!this.markerPlayed && oldFrac > 0.9) {
+        this.markerPlayed = true;
         audioPlayer.playAudio("MARKER");
       }
     }

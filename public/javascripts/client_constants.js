@@ -24,26 +24,32 @@ const AUDIO = [
   {
     "name": "PLACE",
     "path": "../audio/place.wav",
+    "volume": 1
   },
   {
     "name": "MOVE",
     "path": "../audio/move.wav",
+    "volume": 1
   },
   {
     "name": "MARKER",
     "path": "../audio/marker.wav",
+    "volume": 1
   },
   {
     "name": "RING",
     "path": "../audio/ring.wav",
+    "volume": 0.25
   },
   {
     "name": "WIN",
     "path": "../audio/win.wav",
+    "volume": 1
   },
   {
     "name": "LOSE",
     "path": "../audio/lose.wav",
+    "volume": 1
   }
 ];
 

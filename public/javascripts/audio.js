@@ -6,6 +6,7 @@ export default
     this.audio = {};
     for (let audio of AUDIO) {
       this.audio[audio.name] = new Audio(audio.path);
+      this.audio[audio.name].volume = audio.volume;
     }
   }
 
