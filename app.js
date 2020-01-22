@@ -55,9 +55,10 @@ const players = [];
 setInterval(() => {
   for (let player of players) {
     const ws = player.ws;
-    if (ws.alive === false && !player.connected) {
+    if (ws.alive === false) {
       ws.terminate();
       player.connected = false;
+      deletePlayer(player.id);
     }
 
     ws.alive = false;

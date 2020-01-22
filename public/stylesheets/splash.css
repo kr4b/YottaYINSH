@@ -1,6 +1,6 @@
 #menu {
   grid-template-areas: "menu-header" "description" "stats-list";
-  grid-template-rows: 1fr 3fr 3fr;
+  grid-template-rows: 1fr 4fr 3fr;
   grid-template-columns: 1fr;
 }
 
@@ -18,7 +18,7 @@
 
 #description {
   grid-area: description;
-
+  white-space: pre-line;
   text-align: justify;
 }
 
@@ -28,6 +28,28 @@
 
 #stat-list > ul {
   list-style-type: "\2767";
+  list-style: none;
+  font-size: 1.3em;
+  margin: 0;
+  padding: 0 1ch;
+}
+
+li {
+  padding: .25em 0;
+}
+
+li > div {
+  display: inline-block;
+  padding: .2em;
+  box-sizing: border-box;
+
+  font-family: inherit;
+  color: inherit;
+
+  background-color: var(--bg-color);
+
+  border: none;
+  border-bottom: 1px solid var(--highlight-color-light);
 }
 
 #content-header {
