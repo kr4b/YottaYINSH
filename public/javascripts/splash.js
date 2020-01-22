@@ -106,14 +106,14 @@ onload = () => {
   document.getElementById("name-input").oninput = e => {
     const name = e.srcElement.value;
     if (name.replace(/\s/g, "").length == 0)
-    socket.send("name", { id: sessionStorage.getItem("id"), name: "Guest" });
+      socket.send("name", { id: sessionStorage.getItem("id"), name: "Guest" });
     else
       socket.send("name", { id: sessionStorage.getItem("id"), name: name });
   };
 
   socket.setReceive("name", data => {
     sessionStorage.setItem("name", data.name);
-    document.getElementById("name-input").placeholder = data.name;
+    document.getElementById("name-input").placeholder = data.name.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, "\"");
   });
 
   socket.setReceive("games", data => {
