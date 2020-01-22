@@ -10,31 +10,32 @@ export default
   }
 
   // Adds log and updates the board
-  addLog(turnCounter, log) {
-    this.turnCounter = turnCounter;
+  addLog(data) {
+    this.turnCounter = data.turnCounter;
 
     const side = this.getSide();
+    const log = data.log;
 
     let logText = "";
     let animation = null;
 
     // Ring placement
     if (log.ring) {
-      animation = new RingPlaceAnimation(this.board, log.ring.vertical, log.ring.point, side);
+      animation = new RingPlaceAnimation(this.board, data.board, log.ring.vertical, log.ring.point, side);
 
       logText = this.getCoord(log.ring);
     }
     // Ring movement and marker flipping
     else if (log.from && log.to && log.flipped) {
       delete this.board.rings[this.getIndex(log.from.vertical, log.from.point)];
-      animation = new RingMoveAnimation(this.board, log.from, log.to, log.flipped, side)
+      animation = new RingMoveAnimation(this.board, data.board, log.from, log.to, log.flipped, side)
 
       logText = this.getCoord(log.from) + "-" + this.getCoord(log.to);
     }
     // Ring and marker removal
     else if (log.remove && log.remove.ring && log.remove.row && log.side != undefined) {
       delete this.board.rings[this.getIndex(log.remove.ring.vertical, log.remove.ring.point)];
-      animation = new RingRemoveAnimation(this.board, log.remove.ring, log.remove.row, log.side);
+      animation = new RingRemoveAnimation(this.board, data.board, log.remove.ring, log.remove.row, log.side);
 
       let first = null;
       let last = null;
@@ -56,7 +57,7 @@ export default
 
     this.log.push(log);
     return {
-      text: `${turnCounter + 1}-${side == WHITE ? "White" : "Black"}.${logText}`,
+      text: `${this.turnCounter + 1}-${side == WHITE ? "White" : "Black"}.${logText}`,
       animation: animation
     };
   }

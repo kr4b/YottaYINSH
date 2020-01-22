@@ -203,7 +203,6 @@ function joinGame(ws, message) {
     player.ws.on("close", () => deletePlayer(player.id));
     return {
       role: "spectating",
-      board: game.yinsh.getBoardJSON(),
       name1: game.yinsh.players[0].name,
       name2: game.yinsh.players[1].name,
       startTime: game.startTime,
@@ -284,6 +283,12 @@ function handleRequest(ws, message) {
     case "turn": {
       const game = getGamePrivate(data.game);
       if (game != null) game.handleMove(data);
+      break;
+    }
+
+    case "boardRequest": {
+      const game = getGamePrivate(data.game);
+      if (game != null) response = game.yinsh.getBoardJSON();
       break;
     }
 
