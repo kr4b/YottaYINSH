@@ -11,6 +11,16 @@ onload = () => {
   const socket = new Socket(new WebSocket(SOCKET_URL));
   let games = [];
 
+  { // Cookie to keep track of the amount of visits
+    const regex = /visits\s*=\s*([0-9]*)/;
+    const match = document.cookie.match(regex);
+    if (match && match.length >= 1) {
+      document.cookie = `visits=${parseInt(match[1]) + 1}`;
+    } else {
+      document.cookie = `visits=1`;
+    }
+  }
+
   { // Add scrollbar width padding to some elements
     const gameListHeader = document.getElementById("content-header");
     const gameList = document.getElementById("game-list");
@@ -53,6 +63,9 @@ onload = () => {
     statistics[0].innerHTML = activeGames;
     statistics[1].innerHTML = players;
     statistics[2].innerHTML = formatTime(gameTime);
+    const regex = /visits\s*=\s*([0-9]*)/;
+    const match = document.cookie.match(regex);
+    statistics[3].innerHTML = match[1];
   }
 
   async function refreshGameItems() {
