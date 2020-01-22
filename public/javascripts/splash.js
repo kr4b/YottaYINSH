@@ -42,12 +42,6 @@ onload = () => {
     gameList.style.paddingLeft = `${scrollbarWidth}px`;
   }
 
-  { // Set your name
-    if (sessionStorage.getItem("name")) {
-      document.getElementById("name-input").placeholder = sessionStorage.getItem("name");
-    }
-  }
-
   // Add a game item to the list
   async function addGameItem(gameId, availability, player1, player2, elapsedTime) {
     const time = formatTime(elapsedTime);
@@ -100,6 +94,8 @@ onload = () => {
 
   socket.ws.onopen = () => {
     if (sessionStorage.getItem("id") == null) socket.send("session", {});
+    if (sessionStorage.getItem("name"))
+      socket.send("name", { id: sessionStorage.getItem("id"), name: sessionStorage.getItem("name") });
 
     socket.send("games", {});
     setInterval(() => {
@@ -109,11 +105,15 @@ onload = () => {
 
   document.getElementById("name-input").oninput = e => {
     const name = e.srcElement.value;
-    socket.send("name", { id: sessionStorage.getItem("id"), name: name });
+    if (name.replace(/\s/g, "").length == 0)
+      socket.send("name", { id: sessionStorage.getItem("id"), name: "Guest" });
+    else
+      socket.send("name", { id: sessionStorage.getItem("id"), name: name });
   };
 
   socket.setReceive("name", data => {
     sessionStorage.setItem("name", data.name);
+    document.getElementById("name-input").placeholder = data.name.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, "\"");
   });
 
   socket.setReceive("games", data => {
