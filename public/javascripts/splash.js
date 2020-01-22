@@ -109,9 +109,12 @@ onload = () => {
 
   document.getElementById("name-input").oninput = e => {
     const name = e.srcElement.value;
-    sessionStorage.setItem("name", name);
     socket.send("name", { id: sessionStorage.getItem("id"), name: name });
   };
+
+  socket.setReceive("name", data => {
+    sessionStorage.setItem("name", data.name);
+  });
 
   socket.setReceive("games", data => {
     games = data.games;

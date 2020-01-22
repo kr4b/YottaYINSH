@@ -231,18 +231,25 @@ function getPrivateId(ws, message) {
 
 // Sets the name of the player with the given id
 function setName(ws, data) {
-  const player = getPlayer(data.id);
+  const name = data.name
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+  
+    const player = getPlayer(data.id);
   if (player == null) {
     const player = {
       ws,
       id: data.id,
-      name: data.name,
+      name: name,
       connected: true
     };
     players.push(player);
   } else {
-    player.name = data.name;
+    player.name = name;
   }
+
+  return { name: name };
 }
 
 // Handle request from the given client
@@ -281,7 +288,7 @@ function handleRequest(ws, message) {
     }
 
     case "name":
-      setName(ws, data);
+      response = setName(ws, data);
       break;
 
     case "row": {

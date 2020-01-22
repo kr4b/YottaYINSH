@@ -176,11 +176,15 @@ export default
     );
 
     this.ctx.font = "bold 28px 'Lucida Grande', Helvetica, Arial, sans-serif";
-    this.drawName(this.ringPadding, (this.ringPadding + this.ringSize) * 2 + this.ringWidth, this.name1, "top");
+    this.drawName(
+      this.ringPadding,
+      (this.ringPadding + this.ringSize) * 2 + this.ringWidth,
+      this.name1.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, "\""),
+      "top");
     this.drawName(
       this.ctx.canvas.width - this.ctx.measureText(this.name2).width - this.ringPadding,
       this.ctx.canvas.height - ((this.ringPadding + this.ringSize) * 2 + this.ringWidth),
-      this.name2,
+      this.name2.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, "\""),
       "bottom"
     );
   }
