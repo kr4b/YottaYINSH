@@ -109,6 +109,7 @@ export default
       key: "boardUpdate",
       data: {
         turnCounter: this.yinsh.turnCounter,
+        board: this.yinsh.getBoardJSON(),
         log,
       }
     };

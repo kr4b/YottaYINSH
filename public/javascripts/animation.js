@@ -27,9 +27,10 @@ function getIndex(vertical, point) {
 
 // Abstract board animation class
 class BoardAnimation {
-  constructor(board) {
+  constructor(board, newBoard) {
     this.DURATION = 1000;
     this.board = board;
+    this.newBoard = newBoard;
     this.start = new Date().getTime();
     this.done = false;
   }
@@ -40,6 +41,7 @@ class BoardAnimation {
     const diff = new Date().getTime() - this.start;
 
     if (diff >= this.DURATION) {
+      this.updateBoard();
       this.done = true;
     }
 
@@ -49,12 +51,18 @@ class BoardAnimation {
   update(audioPlayer) {
     throw new Error("This method should be overwritten by subclass and not be called directly")
   }
+
+  updateBoard() {
+    this.board.rings = this.newBoard.rings;
+    this.board.markers = this.newBoard.markers;
+    this.board.ringsRemoved = this.newBoard.ringsRemoved;
+  }
 }
 
 // Animation for ring placement
 class RingPlaceAnimation extends BoardAnimation {
-  constructor(board, vertical, point, side) {
-    super(board);
+  constructor(board, newBoard, vertical, point, side) {
+    super(board, newBoard);
     this.DURATION = 500;
     this.vertical = vertical;
     this.point = point;
@@ -81,16 +89,14 @@ class RingPlaceAnimation extends BoardAnimation {
     // Animation done
     if (this.done) {
       audioPlayer.playAudio("PLACE");
-      this.board.rings[getIndex(this.vertical, this.point)] = this.side;
-      return;
     }
   }
 }
 
 // Animation for ring movement and marker flipping
 class RingMoveAnimation extends BoardAnimation {
-  constructor(board, from, to, flipped, side) {
-    super(board);
+  constructor(board, newBoard, from, to, flipped, side) {
+    super(board, newBoard);
     this.DURATION = 1200;
     this.from = from;
     this.to = to;
@@ -154,25 +160,13 @@ class RingMoveAnimation extends BoardAnimation {
       lerp(fromCoord.x, toCoord.x, newFrac),
       lerp(fromCoord.y, toCoord.y, newFrac),
     );
-
-    // Animation done
-    if (this.done) {
-      this.board.rings[getIndex(this.to.vertical, this.to.point)] = this.side;
-      for (let key in this.flipped) {
-        const index = this.flipped[key];
-        this.board.markers[index] = (this.board.markers[index] + 1) % 2;
-      }
-
-      this.board.markers[getIndex(this.from.vertical, this.from.point)] = this.side;
-      return;
-    }
   }
 }
 
 // Animation for ring and marker removing
 class RingRemoveAnimation extends BoardAnimation {
-  constructor(board, ring, row, side) {
-    super(board);
+  constructor(board, newBoard, ring, row, side) {
+    super(board, newBoard);
     this.DURATION = 1200;
     this.vertical = ring.vertical;
     this.point = ring.point;
@@ -236,9 +230,6 @@ class RingRemoveAnimation extends BoardAnimation {
     // Animation done
     if (this.done) {
       audioPlayer.playAudio("RING");
-
-      this.board.ringsRemoved[this.side]++;
-      return;
     }
   }
 }

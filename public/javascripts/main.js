@@ -46,10 +46,7 @@ onload = () => {
 
   socket.setReceive("join", data => {
     if (data.role == "spectating") {
-      // document.querySelector("#spectating").style.display = "block";
-      board.rings = data.board.rings;
-      board.markers = data.board.markers;
-      board.ringsRemoved = data.board.ringsRemoved;
+      socket.send("boardRequest", { game: gameId });
       board.name1 = data.name1;
       board.name2 = data.name2;
       startTime = data.startTime;
@@ -89,9 +86,32 @@ onload = () => {
     }
   });
 
+  window.onfocus = () => {
+    socket.send("boardRequest", { game: gameId });
+  }
+
+  socket.setReceive("boardRequest", data => {
+    for (let i = animations.length - 1; i >= 0; i--) {
+      const animation = animations[i];
+      if (!animation.done) {
+        animation.update(audioPlayer);
+      }
+
+      if (animation.done) {
+        animations.splice(i, 1);
+      }
+    }
+
+    if (animations.length > 0) return;
+
+    board.rings = data.rings;
+    board.markers = data.markers;
+    board.ringsRemoved = data.ringsRemoved;
+  });
+
   socket.setReceive("boardUpdate", data => {
     const logContainer = document.getElementById("log-container");
-    const logResult = log.addLog(data.turnCounter, data.log);
+    const logResult = log.addLog(data);
     if (logResult && logResult.text) {
       const turnNumber = logResult.text.replace(/^([0-9]+)-.*$/, "$1");
       const side = logResult.text.replace(/^.*(BLACK|WHITE).*$/i, "$1");
