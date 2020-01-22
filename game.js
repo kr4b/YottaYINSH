@@ -98,8 +98,12 @@ export default
     message = JSON.stringify(message);
     if (this.player1) this.player1.ws.send(message);
     if (this.player2) this.player2.ws.send(message);
-    for (let i = 0; i < this.spectators.length; i++) {
-      this.spectators[i].ws.send(message);
+    for (let i = this.spectators.length - 1; i >= 0; i--) {
+      if (this.spectators[i].ws) {
+        this.spectators[i].ws.send(message);
+      } else {
+        this.spectators.splice(i, 1);
+      }
     }
   }
 

@@ -55,10 +55,10 @@ const players = [];
 setInterval(() => {
   for (let player of players) {
     const ws = player.ws;
-    if (ws.alive === false) {
-      ws.terminate();
-      player.connected = false;
-      deletePlayer(player.id);
+    if (ws.alive === false && !player.connected) {
+      // ws.terminate();
+      // player.connected = false;
+      // deletePlayer(player.id);
     }
 
     ws.alive = false;
@@ -70,6 +70,14 @@ setInterval(() => {
 function deleteGame(privateId) {
   for (let i = 0; i < games.length; i++) {
     if (games[i].privateId == privateId) {
+      deletePlayer(games[i].player1.id);
+      deletePlayer(games[i].player2.id);
+      for (let i = this.spectators.length - 1; i >= 0; i--) {
+        if (this.spectators[i].ws) {
+          deletePlayer(this.spectators[i].id);
+        }
+      }
+
       games.splice(i, 1);
       break;
     }
@@ -113,6 +121,7 @@ function getPlayer(id) {
 function deletePlayer(id) {
   for (let i = 0; i < players.length; i++) {
     if (players[i].id == id) {
+      players[i].ws.close();
       players.splice(i, 1);
       break;
     }
@@ -191,6 +200,7 @@ function joinGame(ws, message) {
   game.addPlayer(player);
 
   if (isFull) {
+    player.ws.on("close", () => deletePlayer(player.id));
     return {
       role: "spectating",
       board: game.yinsh.getBoardJSON(),
