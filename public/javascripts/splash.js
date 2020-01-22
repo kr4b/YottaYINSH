@@ -75,8 +75,8 @@ onload = () => {
   function updateStatistics(players, gameTime, activeGames) {
     const statistics = document.querySelectorAll(".statistics");
     statistics[0].innerHTML = activeGames;
-    statistics[1].innerHTML = players;
-    statistics[2].innerHTML = formatTime(gameTime);
+    statistics[1].innerHTML = formatTime(gameTime);
+    statistics[2].innerHTML = players;
     const regex = /visits\s*=\s*([0-9]*)/;
     const match = document.cookie.match(regex);
     statistics[3].innerHTML = match[1];
