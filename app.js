@@ -70,8 +70,12 @@ setInterval(() => {
 function deleteGame(privateId) {
   for (let i = 0; i < games.length; i++) {
     if (games[i].privateId == privateId) {
-      deletePlayer(games[i].player1.id);
-      deletePlayer(games[i].player2.id);
+      if (games[i].player1) {
+        deletePlayer(games[i].player1.id);
+      }
+      if (games[i].player2) {
+        deletePlayer(games[i].player2.id);
+      }
       for (let i = this.spectators.length - 1; i >= 0; i--) {
         if (this.spectators[i].ws) {
           deletePlayer(this.spectators[i].id);
@@ -234,8 +238,8 @@ function setName(ws, data) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
-  
-    const player = getPlayer(data.id);
+
+  const player = getPlayer(data.id);
   if (player == null) {
     const player = {
       ws,
