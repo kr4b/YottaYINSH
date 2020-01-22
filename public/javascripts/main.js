@@ -32,6 +32,7 @@ onload = () => {
 
   // Variables to help with board interaction
   const mouse = { x: 0, y: 0 };
+  let terminated = false;
   let startTime = null;
   let pathsPerRing = null;
   let possibleRows = [];
@@ -110,6 +111,9 @@ onload = () => {
   });
 
   socket.setReceive("terminate", data => {
+    if (terminated) return;
+    terminated = true;
+
     let winner;
     let yourResult;
 
@@ -245,6 +249,9 @@ onload = () => {
   };
 
   function update() {
+    const turnIndicator = document.querySelector("#footer-left > input:nth-of-type(1)");
+    turnIndicator.value = `Turn: ${turnType == TURN_TYPE["none"] ? board.name1 : board.name2}`;
+
     board.ctx.clearRect(0, 0, board.ctx.canvas.width, board.ctx.canvas.height);
 
     if (turnType == TURN_TYPE["remove"]) {
@@ -284,7 +291,7 @@ onload = () => {
     }
 
     if (startTime != null) {
-      const timer = document.querySelector("#footer-left > input");
+      const timer = document.querySelector("#footer-left > input:nth-of-type(2)");
       timer.value = formatTime(Math.floor((Date.now() - startTime) / 1000));
     }
 
