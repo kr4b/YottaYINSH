@@ -39,7 +39,16 @@ export default
       return;
     } else if (this.player1 == null) {
       this.player1 = player;
-      this.player1.ws.on("close", () => { this.terminateGame(WHITE) });
+      this.player1.ws.on("close", () => {
+        if (this.yinsh.players.length == 2) {
+          this.terminateGame(
+            this.player1.id == this.yinsh.players[0].id ?
+            BLACK : WHITE
+          );
+        } else {
+          this.terminateGame(WHITE);
+        }
+      });
       if (this.type == "ai") {
         this.player2 = {
           ai: true,
