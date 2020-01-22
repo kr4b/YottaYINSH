@@ -2,7 +2,21 @@ import Socket from "./socket.js";
 import { SOCKET_URL, AVAILABILITY, ICONS, COLOR_PALETTES, formatTime } from "./client_constants.js";
 
 onload = () => {
-  {
+  { // Alert whether screen size is good or bad
+    function alertScreen(media) {
+      if (media.matches) {
+        alert("Screen size is good! :)")
+      } else {
+        alert("Screen size is bad! :(")
+      }
+    }
+
+    let media = window.matchMedia("(min-width: 1000px) and (min-height: 700px)");
+    alertScreen(media);
+    media.addListener(alertScreen);
+  }
+
+  { // Set random highlight color
     const cc = COLOR_PALETTES[(Math.random() * COLOR_PALETTES.length) | 0];
     document.body.style.setProperty("--highlight-color-light", cc[0]);
     document.body.style.setProperty("--highlight-color-dark", cc[1]);
