@@ -14,7 +14,7 @@ import { formatTime } from "./public/javascripts/client_constants.js";
 const __dirname = path.resolve();
 
 const app = express();
-const PORT = process.argv[2] || 3000;
+const PORT = process.env.PORT || 3000;
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
